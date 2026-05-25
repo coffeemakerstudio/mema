@@ -5,10 +5,10 @@ Maintainer: Eugen Lupricht <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf
 Recommends: unzip
 Filename: ./mema.deb
-Size: 4064
-MD5sum: 6f392ff062744ff335c9358f8318de2d
-SHA1: d08b8ecfc3e31847422680e43e99e2d9e645089c
-SHA256: 668cf97ee6142ff1e672544a034671b3d610d0f91d867487059e8c70ee9d3428
+Size: 4068
+MD5sum: 12b251f70ac8aab45c55f103fdd99f43
+SHA1: cd6954c3ac158ae536d18948516aabdbb95e5528
+SHA256: e8134332355ffe2ff73a7e31dff7f66053598bea48a2c53ab51856146ef4e291
 Section: utils
 Priority: optional
 Description: The Minimalist Meta-Manager
@@ -22,10 +22,10 @@ Architecture: all
 Maintainer: Eugen Lupricht <mema@lupricht.net>
 Depends: mema, curl, tar, jq
 Filename: ./mema-go_1-1_all.deb
-Size: 1604
-MD5sum: 040c89031701f28bdb977e00271f0f14
-SHA1: 95cec58d30fc3d66b88077623022f69fa4486892
-SHA256: b5c241c334e87ddbd2ae40bc39f1ba8a3ec80c50512a461d3c132b97b18deb17
+Size: 1606
+MD5sum: ef0e6058cd4d125fb3316cbc548742e4
+SHA1: 4f470cecbda1c98f5feff918ba700dd1118f9761
+SHA256: 257c524731c75491874e366f6a466f49c507286fcf1f3f840df8226c1078efeb
 Section: devel
 Priority: optional
 Description: Auto-generated default Go installer (Mema recipe)
@@ -45,10 +45,10 @@ Architecture: all
 Maintainer: Eugen Lupricht <mema@lupricht.net>
 Depends: mema, mema-go
 Filename: ./mema-go-latest_1.26.3_amd64.deb
-Size: 898
-MD5sum: f7eaf511242d720492e15b40d52adfb5
-SHA1: d704c9d259b7a7af57d6410b1cb05609275d813a
-SHA256: cc09c59c76f8a10e6932471f599067b70aebd0deecce5b14e0bf1766af2313b1
+Size: 902
+MD5sum: 7302776f6364fe8ccb2dcb1a34a0c897
+SHA1: 03cc07fcdfc9306881f70366295ba4544bcbdd54
+SHA256: 89b5ff3c0a74b052b4b4b3bfc621863c5e1c0f548bb3ecf70e0242d3eba385f1
 Section: utils
 Priority: optional
 Description: Auto-generated lifecycle trigger for Go (1.26.3).
