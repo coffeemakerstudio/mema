@@ -9,11 +9,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+echo "--- Setting up Coffee Maker Studio repository ---"
 mkdir -p -m 755 /etc/apt/keyrings
-
-curl -fsSL "https://raw.githubusercontent.com/eugen252009/mema-core/refs/heads/main/mema.gpg" | gpg --dearmor --yes -o "$KEYRING"
+curl -fsSL "https://raw.githubusercontent.com/coffeemakerstudio/mema/refs/heads/main/mema.gpg" | gpg --dearmor --yes -o "$KEYRING"
 chmod 644 "$KEYRING"
+echo "deb [signed-by=$KEYRING] https://coffeemakerstudio.github.io/mema/ ./" > "$LIST"
 
-# Add repo
-echo "deb [signed-by=$KEYRING]  https://eugen252009.github.io/mema-core/ ./" > "$LIST"
-sudo apt update
+echo "--- Updating apt ---"
+apt update
+
+echo "--- Installing mema ---"
+apt install -y mema
+
+echo "--- Installation complete! ---"
