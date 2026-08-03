@@ -228,3 +228,58 @@ for tool in "${recipes[@]}"; do
 
     echo "--- Recipe $tool testing completed successfully ---"
 done
+
+echo "========================================="
+echo "Testing Library Prefix Feature (lib- prefix)"
+echo "========================================="
+
+echo "--- Creating mock library recipe ---"
+cat << 'EOF' > /tmp/lib-test.sh
+NAME="lib-test"
+mema_get_versions() {
+    echo "1.0.0 amd64 dummyhash dummyurl"
+}
+mema_install() {
+    mkdir -p "$MEMA_INSTALL_DIR"
+    echo "libtest-content" > "$MEMA_INSTALL_DIR/libtest.so"
+    mema_use
+}
+mema_use() {
+    mkdir -p "$MEMA_LIB_DIR"
+    ln -sf "$MEMA_INSTALL_DIR/libtest.so" "$MEMA_LIB_DIR/libtest.so"
+}
+EOF
+
+echo "--- Installing lib-test 1.0.0 via file recipe ---"
+mema install --file /tmp/lib-test.sh lib-test 1.0.0
+
+echo "Verifying installation path..."
+if [ ! -f "/opt/mema/lib/lib-test/1.0.0/libtest.so" ]; then
+    echo "Error: Library files not installed in /opt/mema/lib/lib-test/1.0.0/"
+    exit 1
+fi
+
+echo "Verifying library link activation..."
+if [ ! -L "/opt/mema/lib/libtest.so" ]; then
+    echo "Error: Library not activated at /opt/mema/lib/libtest.so"
+    exit 1
+fi
+
+echo "Checking list output for library..."
+mema list
+if ! mema list | grep "lib-test" >/dev/null; then
+    echo "Error: lib-test not in mema list output"
+    exit 1
+fi
+
+echo "--- Removing lib-test 1.0.0 ---"
+mema remove lib-test 1.0.0
+
+if [ -d "/opt/mema/lib/lib-test/1.0.0" ]; then
+    echo "Error: lib-test installation directory not removed"
+    exit 1
+fi
+
+rm -f /tmp/lib-test.sh
+echo "--- Library Prefix Feature tested successfully! ---"
+

@@ -263,7 +263,12 @@ func install(name, version string, s scope, explicitRecipe string) error {
 	if err != nil {
 		return err
 	}
-	installDir := filepath.Join(s.installRoot, name, version)
+	var installDir string
+	if strings.HasPrefix(name, "lib-") {
+		installDir = filepath.Join(s.libDir, name, version)
+	} else {
+		installDir = filepath.Join(s.installRoot, name, version)
+	}
 	if err := os.MkdirAll(filepath.Dir(installDir), 0o755); err != nil {
 		return fmt.Errorf("create tool directory: %w", err)
 	}
@@ -361,10 +366,7 @@ func installed(selected scope, includeGlobal bool) ([]installation, error) {
 		}
 		seen[s.installRoot] = true
 		tools, err := os.ReadDir(s.installRoot)
-		if errors.Is(err, os.ErrNotExist) {
-			continue
-		}
-		if err != nil {
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("read %s: %w", s.installRoot, err)
 		}
 		for _, tool := range tools {
@@ -378,6 +380,25 @@ func installed(selected scope, includeGlobal bool) ([]installation, error) {
 			for _, version := range versions {
 				if version.IsDir() {
 					result = append(result, installation{name: tool.Name(), version: version.Name(), scope: s})
+				}
+			}
+		}
+
+		libs, err := os.ReadDir(s.libDir)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("read %s: %w", s.libDir, err)
+		}
+		for _, lib := range libs {
+			if !lib.IsDir() || !strings.HasPrefix(lib.Name(), "lib-") {
+				continue
+			}
+			versions, err := os.ReadDir(filepath.Join(s.libDir, lib.Name()))
+			if err != nil {
+				return nil, fmt.Errorf("read versions for %s: %w", lib.Name(), err)
+			}
+			for _, version := range versions {
+				if version.IsDir() {
+					result = append(result, installation{name: lib.Name(), version: version.Name(), scope: s})
 				}
 			}
 		}
@@ -403,7 +424,12 @@ func filterInstallations(items []installation, name, version string) []installat
 }
 
 func activate(item installation) error {
-	installDir := filepath.Join(item.scope.installRoot, item.name, item.version)
+	var installDir string
+	if strings.HasPrefix(item.name, "lib-") {
+		installDir = filepath.Join(item.scope.libDir, item.name, item.version)
+	} else {
+		installDir = filepath.Join(item.scope.installRoot, item.name, item.version)
+	}
 	recipe, err := findRecipe(item.name, item.scope, "")
 	if err == nil {
 		hasUse, checkErr := recipeHasFunction(recipe, "mema_use")
@@ -514,13 +540,17 @@ func activeVersion(s scope, name string) string {
 	if err != nil {
 		return "---"
 	}
-	prefix := filepath.Join(s.installRoot, name) + string(filepath.Separator)
+	base := s.installRoot
+	if strings.HasPrefix(name, "lib-") {
+		base = s.libDir
+	}
+	prefix := filepath.Join(base, name) + string(filepath.Separator)
 	for _, entry := range entries {
 		target, err := filepath.EvalSymlinks(filepath.Join(s.linkDir, entry.Name()))
 		if err != nil || !strings.HasPrefix(target, prefix) {
 			continue
 		}
-		relative, err := filepath.Rel(filepath.Join(s.installRoot, name), target)
+		relative, err := filepath.Rel(filepath.Join(base, name), target)
 		if err != nil {
 			continue
 		}
@@ -563,7 +593,12 @@ func remove(args []string, s scope) error {
 }
 
 func removeInstallation(item installation) error {
-	installDir := filepath.Join(item.scope.installRoot, item.name, item.version)
+	var installDir string
+	if strings.HasPrefix(item.name, "lib-") {
+		installDir = filepath.Join(item.scope.libDir, item.name, item.version)
+	} else {
+		installDir = filepath.Join(item.scope.installRoot, item.name, item.version)
+	}
 	entries, err := os.ReadDir(item.scope.linkDir)
 	if err == nil {
 		for _, entry := range entries {
