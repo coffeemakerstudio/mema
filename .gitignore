@@ -2,3 +2,5 @@
 **/build
 **/debs
 **/node_modules
+tests/.cache/
+
