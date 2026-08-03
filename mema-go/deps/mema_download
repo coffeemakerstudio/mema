@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+url="$1"
+expected_hash="$2"
+
+if [ -z "$1" ]; then
+	echo "URL is not Set."
+	exit 1
+fi
+if [ -z "$2" ]; then
+	echo "hash was not Set."
+	exit 1
+fi
+
+cache_dir="/tmp/mema/cache"
+filename=$(basename "$url")
+cached_file="$cache_dir/$filename"
+
+mkdir -p "$cache_dir"
+
+if [ -f "$cached_file" ]; then
+	if mema_verify "$cached_file" "$expected_hash"; then
+		echo $cached_file
+		exit 0
+	else
+		printf "Mema: Cache corrupted or outdated for %s. Re-downloading...\n" "$filename" >&2
+		rm -f "$cached_file"
+	fi
+fi
+
+if ! curl -L "$url" -o "$cached_file"; then
+	printf "Mema: ERROR: Download failed for %s\n" "$url" >&2
+	exit 1
+fi
+
+if mema_verify "$cached_file" "$expected_hash"; then
+	echo $cached_file
+	exit 0
+else
+	printf "Mema: ERROR: Hash mismatch after download for %s!\n" "$filename" >&2
+	rm -f "$cached_file"
+	exit 1
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -eu
+
+if [ "$#" -ne 2 ]; then
+    printf 'Usage: mema_verify <file> <sha256>\n' >&2
+    exit 2
+fi
+
+file="$1"
+expected_sha="$2"
+printf '%s  %s\n' "$expected_sha" "$file" | sha256sum -c - >/dev/null

@@ -1,0 +1,4 @@
+**/dist
+**/build
+**/debs
+**/node_modules

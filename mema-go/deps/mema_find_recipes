@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+LOCAL_RECIPES="$HOME/.local/mema/recipes"
+GLOBAL_RECIPES="/opt/mema/recipes"
+
+if [ -f "$LOCAL_RECIPES/$1.sh" ]; then
+	echo "$LOCAL_RECIPES/$1.sh"
+elif [ -f "$GLOBAL_RECIPES/$1.sh" ]; then
+	echo "$GLOBAL_RECIPES/$1.sh"
+else
+	return 1
+fi

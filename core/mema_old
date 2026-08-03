@@ -1,0 +1,193 @@
+#!/bin/sh
+# Mema - The Minimalist Meta-Manager
+set -e
+
+# --- 1. ENV LOGIK & DEFAULTS ---
+if [ "$(id -u)" -eq 0 ]; then
+    : "${MEMA_ROOT:=/opt/mema}"
+    : "${MEMA_BIN:=/usr/local/bin}"
+    SUDO=""
+else
+    : "${MEMA_ROOT:=$HOME/.local/share/mema}"
+    : "${MEMA_BIN:=$HOME/.local/bin}"
+    [ -w "$MEMA_BIN" ] || SUDO="sudo"
+fi
+if [ ! -d "$MEMA_ROOT" ]; then
+    sudo mkdir -p "$MEMA_ROOT"
+    sudo chmod 775 "$MEMA_ROOT" 
+fi
+
+COMMAND="$1"
+MEMA_INSTALL_NAME="$2"
+VERSION="${3:-latest}"
+
+LOCAL_RECIPES="$HOME/.local/share/mema/recipes"
+GLOBAL_RECIPES="/etc/mema/recipes/"
+
+mkdir -p "$MEMA_ROOT" "$MEMA_BIN" "$LOCAL_RECIPES"
+
+# --- 2. CORE FUNKTIONEN ---
+
+mema_download() {
+    local url="$1"
+    local output="$2"
+    local expected_hash="$3"
+    
+    local cache_dir="$MEMA_ROOT/cache"
+    local filename=$(basename "$url")
+    local cached_file="$cache_dir/$filename"
+
+    $SUDO mkdir -p "$cache_dir"
+
+    if [ -f "$cached_file" ]; then
+        if mema_verify "$cached_file" "$expected_hash"; then
+            printf "Mema: Cache hit and verified: %s\n" "$filename"
+            $SUDO cp "$cached_file" "$output"
+            return 0
+        else
+            printf "Mema: Cache corrupted or outdated for %s. Re-downloading...\n" "$filename"
+            $SUDO rm -f "$cached_file"
+        fi
+    fi
+
+    printf "Mema: Downloading %s...\n" "$filename"
+    if ! $SUDO curl -L "$url" -o "$cached_file"; then
+        printf "Mema: ERROR: Download failed for %s\n" "$url"
+        return 1
+    fi
+
+    if mema_verify "$cached_file" "$expected_hash"; then
+        $SUDO cp "$cached_file" "$output"
+        printf "Mema: Download verified and cached.\n"
+    else
+        printf "Mema: ERROR: Hash mismatch after download for %s!\n" "$filename"
+        $SUDO rm -f "$cached_file"
+        return 1
+    fi
+}
+
+find_recipe() {
+    if [ -f "$LOCAL_RECIPES/$1.sh" ]; then
+        echo "$LOCAL_RECIPES/$1.sh"
+    elif [ -f "$GLOBAL_RECIPES/$1.sh" ]; then
+        echo "$GLOBAL_RECIPES/$1.sh"
+    else
+        return 1
+    fi
+}
+
+mema_verify() {
+    local file="$1"
+    local expected_sha="$2"
+    echo "$expected_sha  $file" | sha256sum -c - >/dev/null 2>&1 || return 1
+}
+
+mema_list() {
+    printf "%-15s | %-15s | %s\n" "PACKAGE" "ACTIVE" "VERSIONS"
+    printf -- "--------------------------------------------------------------\n"
+
+    if [ ! -d "$MEMA_ROOT" ]; then
+        return
+    fi
+
+    for tool_path in "$MEMA_ROOT"/*; do
+        [ -d "$tool_path" ] || continue
+        
+        tool_name=$(basename "$tool_path")
+        
+        case "$tool_name" in 
+            completions|bin|cache|.*) continue ;; 
+        esac
+
+        versions=$(ls -1 "$tool_path" | sort -V | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+        
+        active_v="---"
+        if [ -L "$MEMA_BIN/$tool_name" ]; then
+            real_path=$(readlink -f "$MEMA_BIN/$tool_name")
+            active_v=$(echo "$real_path" | sed -n "s|.*/$tool_name/\([^/]*\).*|\1|p")
+        fi
+
+        printf "%-15s | %-15s | %s\n" "$tool_name" "$active_v" "$versions"
+    done
+}
+
+mema_link() {
+    src_bin="$MEMA_INSTALL_DIR/$1"
+    dest_link="$MEMA_BIN/$2"
+    [ -L "$dest_link" ] || [ -f "$dest_link" ] && $SUDO rm -f "$dest_link"
+    printf "Linking: %s -> %s\n" "$dest_link" "$src_bin"
+    $SUDO ln -s "$src_bin" "$dest_link"
+}
+
+
+if [ "$COMMAND" = "list" ]; then
+    mema_list
+    exit 0
+fi
+
+if [ "$COMMAND" = "use" ] && [ -z "$MEMA_INSTALL_NAME" ]; then
+    selection=$(find "$MEMA_ROOT" -maxdepth 2 -mindepth 2 -not -path '*/completions*' -type d | \
+                sed "s|$MEMA_ROOT/||" | tr '/' ' ' | \
+                fzf --header "Wähle Paket und Version" --height 15% --reverse)
+    [ -z "$selection" ] && exit 0
+    MEMA_INSTALL_NAME=$(echo "$selection" | awk '{print $1}')
+    VERSION=$(echo "$selection" | awk '{print $2}')
+fi
+
+if [ -z "$MEMA_INSTALL_NAME" ]; then
+    printf "Usage: mema <install|remove|update|use|choose|list> <tool> [version]\n"
+    exit 1
+fi
+
+recipe_file=$(find_recipe "$MEMA_INSTALL_NAME") || {
+    printf "Error: Recipe for '%s' not found.\n" "$MEMA_INSTALL_NAME"
+    printf "Checked:\n - %s\n - %s\n" "$LOCAL_RECIPES" "$GLOBAL_RECIPES"
+    exit 1
+}
+
+export MEMA_INSTALL_DIR="$MEMA_ROOT/$MEMA_INSTALL_NAME/$VERSION"
+export MEMA_VERSION="$VERSION"
+
+. "$recipe_file"
+
+case "$COMMAND" in
+    install|update)
+        [ "$COMMAND" = "update" ] && $SUDO rm -rf "$MEMA_INSTALL_DIR"
+        $SUDO mkdir -p "$MEMA_INSTALL_DIR"
+        mema_install
+        ;;
+    remove)
+        printf "Mema: Removing %s (%s)...\n" "$MEMA_INSTALL_NAME" "$VERSION"
+        $SUDO find "$MEMA_BIN" -lname "$MEMA_INSTALL_DIR/*" -delete
+        $SUDO rm -rf "$MEMA_INSTALL_DIR"
+        ;;
+    use)
+        mema_install
+        printf "Mema: Now using %s %s\n" "$MEMA_INSTALL_NAME" "$VERSION"
+        ;;
+	choose)
+        _root="$MEMA_ROOT"
+        _pkg="$MEMA_INSTALL_NAME"
+
+        selected=$(mema_get_versions | fzf -m --header "Versionen für $_pkg")
+        [ -z "$selected" ] && exit 0
+        
+        for v in $selected; do
+            clean_v=$(echo "$v" | sed 's/^.*: //')
+            
+            export MEMA_VERSION="$clean_v"
+            export MEMA_INSTALL_DIR="$_root/$_pkg/$clean_v"
+            echo "$MEMA_INSTALL_DIR $MEMA_VERSION"
+            printf "Mema: Installing %s version %s...\n" "$_pkg" "$clean_v"
+            printf "Debug: Target is %s\n" "$MEMA_INSTALL_DIR"
+			
+            $SUDO mkdir -p "$MEMA_INSTALL_DIR"
+            
+            mema_install
+        done
+        ;;
+    *)
+        printf "Unknown command: %s\n" "$COMMAND"
+        exit 1
+        ;;
+esac

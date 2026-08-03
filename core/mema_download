@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -ne 3 ]; then
+    printf 'Usage: mema_download <url> <filename> <sha256>\n' >&2
+    exit 2
+fi
+
+url="$1"
+filename=$(basename "$2")
+expected_hash="$3"
+cache_dir="${MEMA_CACHE:-/tmp/mema/cache}"
+cached_file="$cache_dir/$filename"
+temporary_file="$cached_file.part"
+
+mkdir -p "$cache_dir"
+
+if [ -f "$cached_file" ] && mema_verify "$cached_file" "$expected_hash"; then
+    printf '%s\n' "$cached_file"
+    exit 0
+fi
+
+rm -f "$cached_file" "$temporary_file"
+if ! curl --fail --location --retry 3 --output "$temporary_file" "$url"; then
+    printf 'Mema: download failed for %s\n' "$url" >&2
+    rm -f "$temporary_file"
+    exit 1
+fi
+
+if ! mema_verify "$temporary_file" "$expected_hash"; then
+    printf 'Mema: checksum mismatch for %s\n' "$filename" >&2
+    rm -f "$temporary_file"
+    exit 1
+fi
+
+mv "$temporary_file" "$cached_file"
+printf '%s\n' "$cached_file"

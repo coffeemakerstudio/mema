@@ -9,7 +9,7 @@
 
 ## 💡 The Philosophy
 Mema decouples **installation logic** (how a tool is built) from **distribution** (how a tool is delivered).
-*   **Modular Architecture:** The Core provides the primitives (`mema_install`, `mema_link`), while Recipes provide specific tool definitions.
+*   **Modular Architecture:** The Core provides verified download and version-selection primitives, while Recipes provide specific tool definitions.
 *   **System Integrity:** Zero pollution of `/usr/bin`. All binaries are contained within a deterministic directory structure.
 *   **Explicit Control:** You only install the specific toolchains required for your current environment.
 
@@ -46,9 +46,18 @@ sudo apt install mema-go-latest
 Mema features an interactive UI (via `fzf`) to switch between installed versions instantly:
 
 ```bash
-mema use      # Interactively switch between active versions
-mema choose   # Interactively install a version from a recipe
+# Select an available Go version from fzf, install it, and activate it.
+mema choose go
+
+# Select any installed toolchain/version and repoint its executable links.
+mema use
+
+# Install the latest release, or request one explicitly without fzf.
+mema install go
+mema install go 1.26.4
 ```
+
+`mema install <tool>` resolves `latest` to a concrete version before installation, so `/opt/mema/<tool>/<version>` always remains side-by-side and reproducible. `mema use` activates the selected version by updating links in `/usr/local/bin`; a non-root user is prompted by `sudo` only when activating a global installation.
 
 ---
 
@@ -57,16 +66,21 @@ A Mema recipe is pure shell script—adhering to Data-Oriented Design and avoidi
 
 ```bash
 mema_install() {
-    # Download & verify using core primitives
-    mema_download "$URL" "tool.tar.gz" "$HASH"
+    # Download into the verified Mema cache. It prints the cached path.
+    archive=$(mema_download "$URL" "tool.tar.gz" "$HASH")
     
     # Extract into the deterministic Mema directory
-    tar -C "$MEMA_INSTALL_DIR" -xzf tool.tar.gz
+    tar -C "$MEMA_INSTALL_DIR" -xzf "$archive"
+}
     
-    # Link binaries to be available in PATH
-    mema_link "bin/tool" "tool"
+mema_use() {
+    # Activate an installed version without downloading or extracting again.
+    $MEMA_SUDO mkdir -p "$MEMA_LINK_DIR"
+    $MEMA_SUDO ln -sf "$MEMA_INSTALL_DIR/bin/tool" "$MEMA_LINK_DIR/tool"
 }
 ```
+
+Recipes receive `MEMA_INSTALL_DIR`, `MEMA_VERSION`, `MEMA_CACHE`, `MEMA_LINK_DIR`, `MEMA_LIB_DIR`, and, for an unprivileged activation of a global installation, `MEMA_SUDO=sudo`. Production recipes must provide an upstream SHA-256 and must not use `SKIP_HASH`.
 
 ---
 

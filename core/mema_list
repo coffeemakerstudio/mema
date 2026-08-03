@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+MEMA_ROOT="${MEMA_INSTALL_ROOT:-$HOME/.local/share/mema}"
+MEMA_BIN="${MEMA_LINK_DIR:-$HOME/.local/bin}"
+
+if [ "${1:-}" = "global" ]; then
+	MEMA_ROOT="/opt/mema"
+	MEMA_BIN="/usr/local/bin"
+fi
+
+if [ ! -d "$MEMA_ROOT" ]; then
+	printf "Mema is not initialized. Use \"mema init\".\n"
+	exit 0
+fi
+
+
+printf "%-15s | %-15s | %s\n" "PACKAGE" "ACTIVE" "VERSIONS"
+printf -- "--------------------------------------------------------------\n"
+
+for tool_path in "$MEMA_ROOT"/*; do
+	[ -d "$tool_path" ] || continue
+	
+	tool_name=$(basename "$tool_path")
+	
+	case "$tool_name" in 
+		completions|bin|cache|.*) continue ;; 
+	esac
+
+	versions=$(ls -1 "$tool_path" | sort -V | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+	
+	active_v="---"
+	if [ -L "$MEMA_BIN/$tool_name" ]; then
+		real_path=$(readlink -f "$MEMA_BIN/$tool_name")
+		active_v=$(echo "$real_path" | sed -n "s|.*/$tool_name/\([^/]*\).*|\1|p")
+	fi
+
+	printf "%-15s | %-15s | %s\n" "$tool_name" "$active_v" "$versions"
+done
