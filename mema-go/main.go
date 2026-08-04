@@ -511,6 +511,9 @@ func list(s scope, includeGlobal bool) error {
 	fmt.Println("--------------------------------------------------------------")
 	byName := make(map[string][]installation)
 	for _, item := range items {
+		if item.name == "lib" || item.name == "recipe" || strings.HasPrefix(item.name, "lib-") {
+			continue
+		}
 		key := item.scope.name + "\x00" + item.name
 		byName[key] = append(byName[key], item)
 	}
