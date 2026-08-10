@@ -70,6 +70,9 @@ jobs:
           chmod +x ./tests/test.sh
           ./tests/test.sh
 
+      - name: Run Debian outside test
+        run: ./tests/test_outside.sh
+
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4

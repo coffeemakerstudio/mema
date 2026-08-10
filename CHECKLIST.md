@@ -44,6 +44,7 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 - [ ] Verify package upgrades preserve installed toolchains and active links.
 - [ ] Verify package removal does not unexpectedly remove user installations.
 - [x] Run the Docker smoke test with `./tests/test.sh`.
+- [x] Run the clean-image outside test with `./tests/test_outside.sh`.
 - [x] Confirm the smoke test covers APT installation, `mema list`, `go version`,
   and `/usr/local/bin/go` activation.
 

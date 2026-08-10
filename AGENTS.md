@@ -89,6 +89,7 @@ The current build scripts require Debian packaging tools, Docker for the integra
 ```sh
 ./build-repo.sh
 ./tests/test.sh
+./tests/test_outside.sh
 MEMA_SIGN=1 ./build-repo.sh
 ```
 
@@ -109,7 +110,7 @@ Do not replace the current `dpkg-scanpackages` and `apt-ftparchive` repository g
 
 ## Verification Scope
 
-`tests/test.sh` is the release smoke test. It starts `debian:bookworm-slim`, configures only the locally built APT repository, installs `mema-go-latest`, and verifies both `mema list` and the activated `go` binary. It intentionally proves that the package works on a minimal Debian base; no separate Ubuntu container is needed for this check.
+`tests/test.sh` is the release smoke test. It starts `debian:bookworm-slim`, configures only the locally built APT repository, installs `mema-go-latest`, and verifies both `mema list` and the activated `go` binary. `tests/test_outside.sh` builds a separate clean Debian image from `tests/Dockerfile` and validates package installation and tool execution during the image build. Both tests intentionally prove that the package works on a minimal Debian base; no Ubuntu container is needed.
 
 `mema-go/main.go` and `mema-go/go.mod` are the implementation of record. `mema-go/build.sh`, `mema-go/go_installer.sh`, `mema-go/deps/`, and `mema-go/site.html` are experimental or historical files and must not be treated as part of the package build or runtime contract. `core/mema_old` is historical reference only; do not use it as a source of current paths or APIs.
 
