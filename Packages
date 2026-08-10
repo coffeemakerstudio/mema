@@ -1,64 +1,47 @@
 Package: mema
 Version: 0.0.1
-Architecture: all
-Maintainer: Eugen Lupricht <mema@lupricht.net>
-Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf
+Architecture: amd64
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
-Filename: ./mema.deb
-Size: 4068
-MD5sum: 12b251f70ac8aab45c55f103fdd99f43
-SHA1: cd6954c3ac158ae536d18948516aabdbb95e5528
-SHA256: e8134332355ffe2ff73a7e31dff7f66053598bea48a2c53ab51856146ef4e291
-Section: utils
+Filename: ./mema_0.0.1_amd64.deb
+Size: 1756478
+MD5sum: 02da4006f708700434f86ede3c994e96
+SHA1: 0a4ff658e90f6a0f08b7ad14220ede54532f46ea
+SHA256: 96c006e9dab5368c5b2daef893c178addd8b7e8b942855a504227f2cf2f2ef55
+Section: admin
 Priority: optional
+Homepage: https://github.com/coffeemakerstudio/mema
 Description: The Minimalist Meta-Manager
- Who needs an OS when you have apt and sh?
- Mema is a lightweight POSIX-sh framework to manage binaries
- and completions in /opt and /etc without the bloat.
+ Mema manages verified, isolated binary toolchains without polluting /usr/bin.
 
-Package: mema-Go
-Version: 1-1
+Package: mema-go
+Version: 0.1
 Architecture: all
-Maintainer: Eugen Lupricht <mema@lupricht.net>
-Depends: mema, curl, tar, jq
-Filename: ./mema-go_1-1_all.deb
-Size: 1606
-MD5sum: ef0e6058cd4d125fb3316cbc548742e4
-SHA1: 4f470cecbda1c98f5feff918ba700dd1118f9761
-SHA256: 257c524731c75491874e366f6a466f49c507286fcf1f3f840df8226c1078efeb
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema
+Filename: ./mema-go_0.1_all.deb
+Size: 1852
+MD5sum: ae23b53579d0c223abb17959ad2d5f37
+SHA1: 09d42e5d767ac235e24227439fb449c36c8ecd15
+SHA256: 2da48ccaebe3cd0c76d2c7689d8d4ce4966030c831e5de12470acdf0653e5b7a
 Section: devel
 Priority: optional
-Description: Auto-generated default Go installer (Mema recipe)
- This package provides the pre-baked Mema recipe and execution
- logic for Go. It acts as the permanent base layer.
- .
- Update Strategy:
-  - For automatic updates: Install 'mema-go-latest'.
-  - For manual control: Run 'sudo mema install go latest'.
- .
- This layer is versioned independently of the Go toolchain.
- Verification is performed against official host checksums.
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
 
 Package: mema-go-latest
-Version: 1.26.3
+Version: 1
 Architecture: all
-Maintainer: Eugen Lupricht <mema@lupricht.net>
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-go
-Filename: ./mema-go-latest_1.26.3_amd64.deb
-Size: 902
-MD5sum: 7302776f6364fe8ccb2dcb1a34a0c897
-SHA1: 03cc07fcdfc9306881f70366295ba4544bcbdd54
-SHA256: 89b5ff3c0a74b052b4b4b3bfc621863c5e1c0f548bb3ecf70e0242d3eba385f1
-Section: utils
+Filename: ./mema-go-latest_1_all.deb
+Size: 668
+MD5sum: 4b81b125a6ddc43249bceb6556d87b3e
+SHA1: 7129889afdc0f3808f6385d075e36eff66684f3a
+SHA256: 86f95c60599a9ce4118cd292a0b526a131321d22880d6dfb171555d4cc6a1b85
+Section: devel
 Priority: optional
-Description: Auto-generated lifecycle trigger for Go (1.26.3).
- This package acts as the execution layer within the Mema ecosystem.
- It does not contain the Go binaries itself, but triggers the
- deterministic installation and verification of Go 1.26.3
- via the Mema recipe engine.
- .
- Features:
-  - Automated bootstrap of the specified Go version.
-  - Checksum verification against the original Host (e.g., go.dev).
-  - Atomic symlinking into the system PATH (/usr/local/bin).
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
 
