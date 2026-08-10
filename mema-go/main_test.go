@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -35,6 +36,21 @@ func TestResolveVersionFromRecipe(t *testing.T) {
 	}
 	if version != "1.2.3" {
 		t.Fatalf("resolved version = %q, want %q", version, "1.2.3")
+	}
+}
+
+func TestRecipeEnvExportsLibraryPaths(t *testing.T) {
+	s := scope{linkDir: "/tmp/bin", libDir: "/tmp/lib"}
+	env := strings.Join(recipeEnv(s, "/tmp/tool/1.0.0", "1.0.0"), "\n")
+	for _, value := range []string{
+		"MEMA_INCLUDE_DIR=/tmp/lib/include",
+		"MEMA_LIB_LINK_DIR=/tmp/lib/lib",
+		"MEMA_PKG_CONFIG_DIR=/tmp/lib/pkgconfig",
+		"MEMA_SHARE_DIR=/tmp/lib/share",
+	} {
+		if !strings.Contains(env, value) {
+			t.Errorf("recipe environment is missing %q", value)
+		}
 	}
 }
 

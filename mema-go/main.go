@@ -157,7 +157,17 @@ func run(command string, args []string, local bool, recipeFile string) error {
 }
 
 func initialize(s scope) error {
-	for _, path := range []string{s.installRoot, s.linkDir, s.libDir, s.recipeDir, cacheDir} {
+	for _, path := range []string{
+		s.installRoot,
+		s.linkDir,
+		s.libDir,
+		filepath.Join(s.libDir, "include"),
+		filepath.Join(s.libDir, "lib"),
+		filepath.Join(s.libDir, "pkgconfig"),
+		filepath.Join(s.libDir, "share"),
+		s.recipeDir,
+		cacheDir,
+	} {
 		if err := os.MkdirAll(path, 0o755); err != nil {
 			return fmt.Errorf("create %s: %w", path, err)
 		}
@@ -211,6 +221,10 @@ func recipeEnv(s scope, installDir, version string) []string {
 		"MEMA_CACHE="+cacheDir,
 		"MEMA_LINK_DIR="+s.linkDir,
 		"MEMA_LIB_DIR="+s.libDir,
+		"MEMA_INCLUDE_DIR="+filepath.Join(s.libDir, "include"),
+		"MEMA_LIB_LINK_DIR="+filepath.Join(s.libDir, "lib"),
+		"MEMA_PKG_CONFIG_DIR="+filepath.Join(s.libDir, "pkgconfig"),
+		"MEMA_SHARE_DIR="+filepath.Join(s.libDir, "share"),
 	)
 	if s.global && os.Geteuid() != 0 {
 		env = append(env, "MEMA_SUDO=sudo")

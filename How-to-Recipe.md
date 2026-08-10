@@ -53,6 +53,10 @@ When Mema executes your recipe, it supplies several environment variables. You *
 | `MEMA_CACHE` | Directory to cache downloaded archives. | `/tmp/mema/cache` | `/tmp/mema/cache` |
 | `MEMA_LINK_DIR` | Directory where active executable symlinks must be created. | `$HOME/.local/bin` | `/usr/local/bin` |
 | `MEMA_LIB_DIR` | Directory for shared libraries / helper scripts. | `$HOME/.local/share/mema/lib` | `/opt/mema/lib` |
+| `MEMA_INCLUDE_DIR` | Activated shared header directory. | `$HOME/.local/share/mema/lib/include` | `/opt/mema/lib/include` |
+| `MEMA_LIB_LINK_DIR` | Activated shared library directory. | `$HOME/.local/share/mema/lib/lib` | `/opt/mema/lib/lib` |
+| `MEMA_PKG_CONFIG_DIR` | Activated `pkg-config` metadata directory. | `$HOME/.local/share/mema/lib/pkgconfig` | `/opt/mema/lib/pkgconfig` |
+| `MEMA_SHARE_DIR` | Activated package data directory. | `$HOME/.local/share/mema/lib/share` | `/opt/mema/lib/share` |
 | `MEMA_SUDO` | Prepended to write commands requiring root permissions (evaluates to `sudo` for non-root users when installing globally). | *(empty)* | `sudo` |
 
 ---
