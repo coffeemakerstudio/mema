@@ -15,15 +15,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: false
-
-      - name: Checkout pinned recipes
-        run: |
-          recipe_commit=$(git ls-tree HEAD recipes | awk '{print $3}')
-          rm -rf recipes
-          git clone https://github.com/coffeemakerstudio/mema-recipes.git recipes
-          git -C recipes checkout --detach "$recipe_commit"
 
       - name: Set up Environment
         run: |

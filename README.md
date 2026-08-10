@@ -14,10 +14,10 @@ Mema decouples **installation logic** (how a tool is built) from **distribution*
 *   **Explicit Control:** You only install the specific toolchains required for your current environment.
 
 ## 🏗️ Architecture
-The ecosystem consists of two decoupled repositories:
+The ecosystem consists of the Mema engine and its vendored recipe collection:
 
 1.  **[mema-core](https://github.com/eugen252009/mema-core):** The Engine. Handles caching, deterministic symlinking, and GPG-signed APT distribution.
-2.  **[mema-recipes](https://github.com/eugen252009/mema-recipes):** The Registry. A collection of shell-based recipes for fetching and verifying binaries.
+2.  **`recipes/`:** The vendored registry. A collection of shell-based recipes for fetching and verifying binaries.
 
 ---
 

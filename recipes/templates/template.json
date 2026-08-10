@@ -1,0 +1,16 @@
+{
+  "control": {
+    "name": "{{NAME}}",
+    "version": "{{VERSION}}",
+    "architecture": "{{ARCH}}",
+    "maintainer": "{{MAINTAINER}}",
+    "description": "{{DESCRIPTION}}",
+    "depends": "{{DEPENDS}}",
+    "homepage": "{{HOMEPAGE}}",
+    "section": "{{SECTION}}",
+    "priority": "optional",
+    "postinstbody": "{{COMMAND}}",
+    "essential": "no"
+  },
+  "outdir": "{{OUT_DIR}}"
+}

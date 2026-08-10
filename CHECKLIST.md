@@ -97,8 +97,7 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 ## P2: Release Hygiene
 
 - [x] Keep `dist/` and `build/` generated and uncommitted.
-- [x] Check the `recipes` submodule status separately.
-- [x] Avoid incidental changes to the recipes submodule pointer.
+- [x] Keep recipes vendored in the main repository and review recipe changes with the core.
 - [x] Isolate or remove historical and experimental files from the release
   path.
 - [x] Add versioning and release notes.

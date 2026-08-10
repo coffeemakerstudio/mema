@@ -1,0 +1,6 @@
+Section: devel
+Priority: optional
+Depends: mema, curl, tar
+Description: Python Standalone (indygreg build)
+ A relocatable, high-performance Python distribution that does not depend on
+ system libraries. (Mema pre-baked recipe)

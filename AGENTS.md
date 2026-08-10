@@ -22,14 +22,14 @@ Treat this contract as the target behavior. Do not remove or weaken an advertise
 | `configs/` | Shell configuration loaded from `/etc/profile.d/mema.sh`; defaults live in `00-mema-init.sh`. |
 | `debs/` | Debian package staging tree for the core package, including control metadata and installed files. |
 | `templates/` | Template Package Assembler (`tpa`) input for the core package. |
-| `recipes/` | Git submodule containing independently maintained tool recipes and recipe package build files. |
+| `recipes/` | Vendored tool recipes and recipe package build files. |
 | `build-repo.sh` | Builds the core and recipe Debian packages, then writes the APT index into `dist/`. |
 | `scripts/package.sh` | Compatibility entry point that delegates to `build-repo.sh`. |
 | `install_repo.sh` | Installs the public APT signing key and source, then installs `mema`. |
 | `tests/` | Docker-based APT installation smoke test. |
 | `.github/workflows/build_repo.yml` | Build, GPG signing, integration test, and GitHub Pages deployment workflow. |
 
-`dist/` and `build/` are generated and ignored. Do not commit their contents. The `recipes` directory has its own Git history; make recipe changes in that submodule and commit them there deliberately.
+`dist/` and `build/` are generated and ignored. Do not commit their contents.
 
 ## Runtime Model
 
@@ -121,5 +121,5 @@ Do not replace the current `dpkg-scanpackages` and `apt-ftparchive` repository g
 - Maintain the `/opt/mema` and `/usr/local/bin` separation for global installs. Do not write managed tool binaries into `/usr/bin`.
 - Do not edit generated `dist/` or `build/` artifacts. Do not modify `mema.gpg` unless rotating the repository key intentionally.
 - Keep Debian package metadata, copied file paths, executable modes, and maintainer scripts synchronized with the runtime layout.
-- Do not change the recipes submodule pointer incidentally. Check its status separately before committing.
+- Keep vendored recipe changes in the main repository and review them with the core changes.
 - Run the narrowest relevant verification first, then the Docker APT smoke test for packaging or installation changes.

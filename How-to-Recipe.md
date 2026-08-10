@@ -6,7 +6,7 @@ Mema uses small shell-first recipes to download, install, and activate isolated 
 
 ## 1. Directory Structure
 
-Mema recipes reside inside the `recipes` submodule. If you are adding a new recipe for `<tool>`, create the directory and the script:
+Mema recipes reside inside the vendored `recipes/` directory. If you are adding a new recipe for `<tool>`, create the directory and the script:
 
 ```
 recipes/
