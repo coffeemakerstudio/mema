@@ -48,7 +48,7 @@ echo "deb [trusted=yes] file:///repo ./" > /etc/apt/sources.list.d/mema-test.lis
 apt-get update
 
 echo "--- Installing Mema base package ---"
-apt-get install -y mema jq curl ca-certificates xz-utils tar
+apt-get install -y mema jq curl ca-certificates xz-utils tar gcc
 
 # Find all recipe packages in the repo
 echo "--- Finding built recipe packages ---"
@@ -299,6 +299,60 @@ fi
 
 rm -f /tmp/lib-test.sh
 echo "--- Library Prefix Feature tested successfully! ---"
+
+echo "========================================="
+echo "Testing composed library and program recipes"
+echo "========================================="
+
+cat << 'EOF' > /tmp/lib-composed.sh
+NAME="lib-composed"
+mema_get_versions() { echo "1.0.0 amd64 dummyhash dummyurl"; }
+mema_install() {
+    mkdir -p "$MEMA_INSTALL_DIR/include"
+    cat > "$MEMA_INSTALL_DIR/include/composed.h" <<'HEADER'
+int composed_value(void);
+HEADER
+    cat > "$MEMA_INSTALL_DIR/composed.c" <<'SOURCE'
+int composed_value(void) { return 42; }
+SOURCE
+    gcc -shared -fPIC "$MEMA_INSTALL_DIR/composed.c" -o "$MEMA_INSTALL_DIR/libcomposed.so"
+    mema_use
+}
+mema_use() {
+    mkdir -p "$MEMA_LIB_DIR"
+    ln -sfn "$MEMA_INSTALL_DIR/include/composed.h" "$MEMA_LIB_DIR/composed.h"
+    ln -sfn "$MEMA_INSTALL_DIR/libcomposed.so" "$MEMA_LIB_DIR/libcomposed.so"
+}
+EOF
+
+cat << 'EOF' > /tmp/composed-program.sh
+NAME="composed-program"
+mema_get_versions() { echo "1.0.0 amd64 dummyhash dummyurl"; }
+mema_install() {
+    mkdir -p "$MEMA_INSTALL_DIR/bin"
+    cat > "$MEMA_INSTALL_DIR/main.c" <<'SOURCE'
+#include "composed.h"
+#include <stdio.h>
+int main(void) { printf("%d\n", composed_value()); return 0; }
+SOURCE
+    gcc -I"$MEMA_LIB_DIR" "$MEMA_INSTALL_DIR/main.c" \
+        -L"$MEMA_LIB_DIR" -lcomposed -Wl,-rpath,"$MEMA_LIB_DIR" \
+        -o "$MEMA_INSTALL_DIR/bin/composed-program"
+    mema_use
+}
+mema_use() {
+    mkdir -p "$MEMA_LINK_DIR"
+    ln -sfn "$MEMA_INSTALL_DIR/bin/composed-program" "$MEMA_LINK_DIR/composed-program"
+}
+EOF
+
+mema install --file /tmp/lib-composed.sh lib-composed 1.0.0
+mema install --file /tmp/composed-program.sh composed-program 1.0.0
+[ "$(composed-program)" = "42" ] || { echo "Error: composed program did not use library"; exit 1; }
+mema remove composed-program 1.0.0
+mema remove lib-composed 1.0.0
+rm -f /tmp/lib-composed.sh /tmp/composed-program.sh
+echo "--- Composed library and program tested successfully! ---"
 
 echo "========================================="
 echo "Testing package upgrade and removal safety"

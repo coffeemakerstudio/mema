@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RECIPE_DIR="recipes"
+RECIPE_DIR="${RECIPE_DIR:-recipes}"
 MAINTAINER="Coffee Maker Studio <mema@lupricht.net>"
 HOMEPAGE="https://github.com/coffeemakerstudio/mema"
-OUT_DIR="dist"
+OUT_DIR="${OUT_DIR:-dist}"
 
 [ -d "$RECIPE_DIR" ] || { printf 'Error: directory %s not found.\n' "$RECIPE_DIR" >&2; exit 1; }
 rm -rf "/tmp/mema-recipe" "$OUT_DIR"
@@ -15,9 +15,25 @@ build_deb() {
     dpkg-deb --build "$path" "$output" >/dev/null
 }
 
+recipe_package_dependencies() {
+    local dependency
+    for dependency in ${MEMA_DEPENDS:-}; do
+        printf 'mema-%s-latest, ' "$dependency"
+    done | sed 's/, $//'
+}
+
+recipe_install_commands() {
+    local dependency
+    for dependency in ${MEMA_DEPENDS:-}; do
+        printf '/usr/local/bin/mema install %q latest\n' "$dependency"
+    done
+    printf '/usr/local/bin/mema install %q latest\n' "$NAME"
+}
+
 for recipe in "$RECIPE_DIR"/*/*.sh; do
     [ -f "$recipe" ] || continue
     printf '%s\n' "--- Processing recipe: $recipe ---"
+    unset NAME DESCRIPTION SECTION deps MEMA_DEPENDS RECIPE_DEPS
     source "$recipe"
     if ! declare -F mema_get_versions >/dev/null; then
         printf 'Warning: mema_get_versions() not found in %s\n' "$recipe" >&2
@@ -25,6 +41,7 @@ for recipe in "$RECIPE_DIR"/*/*.sh; do
         continue
     fi
 
+    RECIPE_DEPS=$(recipe_package_dependencies)
     PKG_NAME="mema-$NAME"
     BUILD_PATH="/tmp/mema-recipe/$PKG_NAME"
     mkdir -p "$BUILD_PATH/DEBIAN" "$BUILD_PATH/etc/mema/recipe"
@@ -34,7 +51,7 @@ Package: $PKG_NAME
 Version: 0.1
 Architecture: all
 Maintainer: $MAINTAINER
-Depends: mema${deps:+, $deps}
+Depends: mema${deps:+, $deps}${RECIPE_DEPS:+, $RECIPE_DEPS}
 Homepage: $HOMEPAGE
 Section: $SECTION
 Priority: optional
@@ -51,7 +68,7 @@ Package: $PKG_NAME
 Version: 1
 Architecture: all
 Maintainer: $MAINTAINER
-Depends: mema, mema-$NAME${deps:+, $deps}
+Depends: mema, mema-$NAME${deps:+, $deps}${RECIPE_DEPS:+, $RECIPE_DEPS}
 Homepage: $HOMEPAGE
 Section: $SECTION
 Priority: optional
@@ -60,7 +77,7 @@ EOF
     cat > "$BUILD_PATH/DEBIAN/postinst" <<EOF
 #!/bin/sh
 set -e
-/usr/local/bin/mema install $NAME latest
+$(recipe_install_commands)
 EOF
     chmod 755 "$BUILD_PATH/DEBIAN/postinst"
     build_deb "$BUILD_PATH" "$OUT_DIR/${PKG_NAME}_1_all.deb"

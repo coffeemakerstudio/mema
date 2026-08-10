@@ -29,6 +29,8 @@ NAME="tool-name"
 DESCRIPTION="A description of the tool package."
 MAINTAINER="Your Name <email@example.com>"
 SECTION="devel"
+# Optional whitespace-separated Mema recipes installed before this recipe.
+MEMA_DEPENDS="lib-mylib"
 
 # Keep the shell script execution strict
 set -e
@@ -54,6 +56,20 @@ When Mema executes your recipe, it supplies several environment variables. You *
 ## 4. Required Functions
 
 A Mema recipe must define the following four functions:
+
+`MEMA_DEPENDS` is optional. It contains recipe names, not Debian package names.
+The recipe package builder adds matching `mema-<dependency>-latest` package
+dependencies and writes `mema install <dependency> latest` commands into the
+latest-package `postinst`. This keeps APT responsible for placing recipes while
+Mema performs the actual toolchain installation.
+
+For example, a program that links against `lib-mylib` can use the library's
+stable files through `$MEMA_LIB_DIR`:
+
+```sh
+gcc -I"$MEMA_LIB_DIR" source.c -L"$MEMA_LIB_DIR" -lmylib \
+    -Wl,-rpath,"$MEMA_LIB_DIR" -o "$MEMA_INSTALL_DIR/bin/myprogram"
+```
 
 ### `mema_get_versions`
 Prints available upstream release records to stdout. Each record must follow the whitespace-separated format:

@@ -59,6 +59,7 @@ mema use                             # choose an installed version with fzf
 - Keep recipes POSIX-shell compatible where practical; the current CLI sources them with Bash, but the README defines the project as shell-first and lightweight.
 - Define `mema_install` and `mema_use`. `mema_install` must install then call `mema_use`; `mema_use` must only activate already-installed files by linking them.
 - Define `mema_get_versions` to print `VERSION ARCH SHA256 URL` records and `mema_resolve_version` to print the latest version for the active architecture. The CLI has a first-record fallback for simple recipes, but production recipes should resolve architecture explicitly.
+- Optionally define `MEMA_DEPENDS` as whitespace-separated Mema recipe names. The recipe package builder places those recipes through APT dependencies and calls `mema install <dependency> latest` before installing the dependent recipe.
 - Install only beneath `MEMA_INSTALL_DIR`. Link selected executables into `MEMA_LINK_DIR`, using `MEMA_SUDO` where the destination requires privileges.
 - Download from the upstream HTTPS source and verify SHA-256 before extraction. Never make `SKIP_HASH` the default for a production recipe.
 - Preserve side-by-side version directories. Never overwrite another version's install directory.

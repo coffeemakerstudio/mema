@@ -43,6 +43,9 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 - [x] Verify maintainer scripts create required directories and permissions.
 - [x] Verify package upgrades preserve installed toolchains and active links.
 - [x] Verify package removal does not unexpectedly remove user installations.
+- [x] Generate APT dependencies and postinst installs for composed recipes via
+  `MEMA_DEPENDS`.
+- [x] Compile and run a program linked against a Mema-installed library.
 - [x] Run the Docker smoke test with `./tests/test.sh`.
 - [x] Run the clean-image outside test with `./tests/test_outside.sh`.
 - [x] Confirm the smoke test covers APT installation, `mema list`, `go version`,
