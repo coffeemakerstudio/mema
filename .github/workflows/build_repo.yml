@@ -65,6 +65,9 @@ jobs:
       - name: Run Debian outside test
         run: ./tests/test_outside.sh
 
+      - name: Run Wayland POC test
+        run: ./tests/test_wayland_poc.sh
+
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4

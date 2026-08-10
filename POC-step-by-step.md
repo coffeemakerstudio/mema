@@ -94,10 +94,11 @@ they explicitly opt into autoinstall mode.
 The first graph is deliberately bounded:
 
 ```text
-mema-wayland
-|-- mema-lib-libffi
-|-- mema-lib-expat
-|-- mema-wayland-protocols
+mema-wayland 1.23.1
+|-- mema-lib-libffi 3.4.4
+|-- mema-lib-expat 2.5.0
+|-- mema-lib-xml2 2.9.14
+|-- mema-wayland-protocols 1.43
 `-- mema-wayland
 ```
 
@@ -109,8 +110,6 @@ The source builds require Debian-provided build tools for this POC:
 - `ninja-build`
 - `pkg-config`
 - `python3`
-- `libffi-dev` or the Mema libffi activation
-- `libexpat1-dev` or the Mema expat activation
 - XML tooling required by the selected Wayland release
 
 The exact upstream dependency list, versions, checksums, licenses, and build
@@ -148,15 +147,15 @@ Activation remains link-only. Downloads, extraction, and compilation belong in
 - [x] Define recipe-only and autoinstall package roles.
 - [x] Define exact version metadata and pinned install commands.
 - [x] Define the initial bounded Wayland dependency graph.
-- [ ] Add versioned package metadata to the recipe builder.
-- [ ] Add pinned dependency parsing and validation.
-- [ ] Add explicit autoinstall postinst generation.
-- [ ] Add library include, lib, pkg-config, and share activation helpers.
-- [ ] Add pinned recipes for the selected Wayland dependency versions.
-- [ ] Build the signed `mema-wayland` APT package.
-- [ ] Install it in a clean Debian container.
-- [ ] Verify `wayland-scanner` and `pkg-config` metadata.
-- [ ] Compile and link a minimal Wayland client.
+- [x] Add versioned package metadata to the recipe builder.
+- [x] Add pinned dependency parsing and validation.
+- [x] Add explicit autoinstall postinst generation.
+- [x] Add library include, lib, pkg-config, and share activation helpers.
+- [x] Add pinned recipes for the selected Wayland dependency versions.
+- [x] Build the Wayland APT package (repository signing is release-only).
+- [x] Install it in a clean Debian container.
+- [x] Verify `wayland-scanner`, `pkg-config`, and a linked Wayland client.
+- [x] Compile and link a minimal Wayland client.
 - [ ] Verify side-by-side library versions remain isolated.
 - [ ] Record package contents and checksums.
 - [ ] Define follow-up work for a compositor.
