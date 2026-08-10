@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -78,6 +79,7 @@ func printHelp(w io.Writer) {
 	fmt.Fprintln(w, "  init                         Create Mema directories for the selected scope")
 	fmt.Fprintln(w, "  install <tool> [version]     Install a version; omitted version resolves to latest")
 	fmt.Fprintln(w, "  choose <tool>                Select an available version with fzf and install it")
+	fmt.Fprintln(w, "  check-recipe <tool|file>     Validate a recipe without installing it")
 	fmt.Fprintln(w, "  use [tool] [version]         Select an installed version with fzf and activate it")
 	fmt.Fprintln(w, "  list                         List installed toolchains and active versions")
 	fmt.Fprintln(w, "  remove <tool> [version]      Remove an installed version")
@@ -136,6 +138,11 @@ func run(command string, args []string, local bool, recipeFile string) error {
 			return errors.New("usage: mema choose <tool>")
 		}
 		return choose(args[0], s, recipeFile)
+	case "check-recipe":
+		if len(args) != 1 {
+			return errors.New("usage: mema check-recipe <tool|recipe.sh>")
+		}
+		return checkRecipeCommand(args[0], s, recipeFile)
 	case "use":
 		if len(args) > 2 {
 			return errors.New("usage: mema use [tool] [version]")
@@ -154,6 +161,129 @@ func run(command string, args []string, local bool, recipeFile string) error {
 	default:
 		return fmt.Errorf("unknown command %q; run 'mema help'", command)
 	}
+}
+
+func checkRecipeCommand(value string, s scope, explicit string) error {
+	if explicit == "" && strings.HasSuffix(value, ".sh") {
+		if strings.ContainsRune(value, filepath.Separator) {
+			explicit = value
+		} else if _, err := os.Stat(value); err == nil {
+			explicit = value
+		}
+		value = strings.TrimSuffix(filepath.Base(value), ".sh")
+	}
+	recipe, err := findRecipe(value, s, explicit)
+	if err != nil {
+		return err
+	}
+	report, err := checkRecipeReport(recipe)
+	if err != nil {
+		return fmt.Errorf("check recipe %s: %w", recipe, err)
+	}
+	fmt.Printf("Recipe: %s\n", recipe)
+	fmt.Println("status:")
+	fmt.Printf("  functions -> %s\n", checkStatus(report.functions))
+	fmt.Printf("  version   -> %s\n", checkStatus(report.version))
+	fmt.Printf("  checksum  -> %s\n", checkStatus(report.checksum))
+	fmt.Printf("  install   -> %s (contract checked; not executed)\n", checkStatus(report.install))
+	fmt.Printf("  linking   -> %s (contract checked; not executed)\n", checkStatus(report.linking))
+	return nil
+}
+
+func checkStatus(ok bool) string {
+	if ok {
+		return "pass"
+	}
+	return "fail"
+}
+
+var sha256Pattern = regexp.MustCompile(`^[[:xdigit:]]{64}$`)
+
+type recipeCheckReport struct {
+	functions bool
+	version   bool
+	checksum  bool
+	install   bool
+	linking   bool
+}
+
+func checkRecipe(recipe string) error {
+	_, err := checkRecipeReport(recipe)
+	return err
+}
+
+func checkRecipeReport(recipe string) (recipeCheckReport, error) {
+	var report recipeCheckReport
+	for _, function := range []string{"mema_get_versions", "mema_resolve_version", "mema_install", "mema_use"} {
+		hasFunction, err := recipeHasFunction(recipe, function)
+		if err != nil {
+			return report, err
+		}
+		if !hasFunction {
+			return report, fmt.Errorf("missing required function %s", function)
+		}
+	}
+	report.functions = true
+
+	installBody, err := recipeFunctionBody(recipe, "mema_install")
+	if err != nil {
+		return report, fmt.Errorf("inspect mema_install: %w", err)
+	}
+	if !strings.Contains(installBody, "mema_use") {
+		return report, errors.New("mema_install does not call mema_use")
+	}
+	report.install = true
+
+	linkBody, err := recipeFunctionBody(recipe, "mema_use")
+	if err != nil {
+		return report, fmt.Errorf("inspect mema_use: %w", err)
+	}
+	if !strings.Contains(linkBody, "ln ") && !strings.Contains(linkBody, "ln\t") && !strings.Contains(linkBody, "mema_link") {
+		return report, errors.New("mema_use does not contain link behavior")
+	}
+	report.linking = true
+
+	output, err := recipeOutput(recipe, `source "$1"; mema_get_versions`)
+	if err != nil {
+		return report, fmt.Errorf("read version records: %w", err)
+	}
+	if strings.TrimSpace(output) == "" {
+		return report, errors.New("mema_get_versions returned no records")
+	}
+	report.version = true
+	for lineNumber, line := range strings.Split(output, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			return report, fmt.Errorf("version record %d has fewer than four fields", lineNumber+1)
+		}
+		if !sha256Pattern.MatchString(fields[2]) {
+			return report, fmt.Errorf("version record %d has an invalid SHA-256 checksum", lineNumber+1)
+		}
+		if !strings.HasPrefix(fields[3], "https://") {
+			return report, fmt.Errorf("version record %d does not use HTTPS", lineNumber+1)
+		}
+	}
+	report.checksum = true
+
+	version, err := resolveVersion(recipe, "latest")
+	if err != nil {
+		return report, fmt.Errorf("resolve latest version: %w", err)
+	}
+	if strings.TrimSpace(version) == "" || strings.ContainsAny(version, " \t\n") {
+		return report, errors.New("latest version is not a single value")
+	}
+	return report, nil
+}
+
+func recipeFunctionBody(recipe, function string) (string, error) {
+	cmd := exec.Command("bash", "-c", `source "$1"; declare -f "$2"`, "mema", recipe, function)
+	cmd.Env = os.Environ()
+	cmd.Stderr = os.Stderr
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("inspect %s: %w", recipe, err)
+	}
+	return strings.TrimSpace(string(output)), nil
 }
 
 func initialize(s scope) error {

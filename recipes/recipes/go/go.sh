@@ -16,7 +16,7 @@ mema_get_versions() {
         | select(.stable == true)
         | .version as $v
         | .files[]?
-        | select(.os == "linux" and .kind == "archive")
+        | select(.os == "linux" and .kind == "archive" and (.arch == "amd64" or .arch == "arm64") and (.sha256 // "") != "")
         | "\($v | sub("go";"")) \(.arch) \(.sha256) \("https://go.dev/dl/" + .filename) libc6"
     '
 }

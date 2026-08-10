@@ -66,6 +66,38 @@ func TestResolveVersionRejectsNonScalarOutput(t *testing.T) {
 	}
 }
 
+func TestCheckRecipeValidatesWithoutInstalling(t *testing.T) {
+	recipe := filepath.Join(t.TempDir(), "recipe.sh")
+	content := `mema_get_versions() { printf '%s\n' '1.2.3 amd64 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef https://example.invalid/tool.tar.gz'; }
+mema_resolve_version() { printf '%s\n' '1.2.3'; }
+mema_install() { touch "$MEMA_INSTALL_DIR/should-not-exist"; mema_use; }
+mema_use() { ln -s source destination; }
+`
+	if err := os.WriteFile(recipe, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := checkRecipe(recipe); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckRecipeRejectsUncheckedRecord(t *testing.T) {
+	recipe := filepath.Join(t.TempDir(), "recipe.sh")
+	content := `mema_get_versions() { printf '%s\n' '1.2.3 amd64 missing https://example.invalid/tool.tar.gz'; }
+mema_resolve_version() { printf '%s\n' '1.2.3'; }
+mema_install() { mema_use; }
+mema_use() { ln -s source destination; }
+`
+	if err := os.WriteFile(recipe, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := checkRecipe(recipe); err == nil {
+		t.Fatal("checkRecipe accepted an invalid checksum")
+	}
+}
+
 func TestFilterInstallations(t *testing.T) {
 	items := []installation{
 		{name: "go", version: "1.26.4"},

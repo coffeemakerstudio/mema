@@ -1,0 +1,53 @@
+#!/bin/sh
+NAME="ruby"
+DESCRIPTION="Mema-managed Ruby runtime"
+SECTION="devel"
+MEMA_PACKAGE_VERSION="3.4.10"
+MEMA_AUTOINSTALL="1"
+deps="build-essential, autoconf, bison, libssl-dev, libyaml-dev, libreadline-dev, zlib1g-dev, libncurses-dev, libffi-dev"
+
+set -e
+
+mema_get_versions() {
+    printf '%s\n' \
+        '3.4.10 amd64 ecee2d072a14f2d14347dd56dfd8fe5c3130abf5117bfaacbda0f4ef9cc429ec https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.10.tar.gz' \
+        '3.4.10 arm64 ecee2d072a14f2d14347dd56dfd8fe5c3130abf5117bfaacbda0f4ef9cc429ec https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.10.tar.gz'
+}
+
+mema_resolve_version() { printf '%s\n' "$MEMA_PACKAGE_VERSION"; }
+
+mema_install() {
+    local archive work source_dir sudo_cmd
+    case "$(uname -m)" in
+        x86_64|aarch64) ;;
+        *) printf 'Mema Error: Ruby is not supported on architecture %s.\n' "$(uname -m)" >&2; return 1 ;;
+    esac
+    sudo_cmd="${MEMA_SUDO:-}"
+    archive=$(mema_download \
+        'https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.10.tar.gz' \
+        'ruby-3.4.10.tar.gz' \
+        'ecee2d072a14f2d14347dd56dfd8fe5c3130abf5117bfaacbda0f4ef9cc429ec')
+    work=$(mktemp -d)
+    trap 'rm -rf "$work"' EXIT
+    tar -xzf "$archive" -C "$work"
+    source_dir="$work/ruby-3.4.10"
+    (
+        cd "$source_dir"
+        ./configure --prefix="$MEMA_INSTALL_DIR" --disable-install-doc
+        make -j"$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '1')"
+        $sudo_cmd make install
+    )
+    mema_use
+    trap - EXIT
+    rm -rf "$work"
+}
+
+mema_use() {
+    local file sudo_cmd
+    sudo_cmd="${MEMA_SUDO:-}"
+    $sudo_cmd mkdir -p "$MEMA_LINK_DIR"
+    for file in "$MEMA_INSTALL_DIR/bin"/*; do
+        [ -x "$file" ] || continue
+        $sudo_cmd ln -sfn "$file" "$MEMA_LINK_DIR/${file##*/}"
+    done
+}

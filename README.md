@@ -1,9 +1,9 @@
 # 🍱 Mema: The Minimalist Meta-Manager
 
-**Mema** is a high-performance, POSIX-sh framework designed for deterministic binary management. It is not a bloated package manager; it is a lightweight infrastructure designed to manage toolchains (Go, Rust, Zig, Node) in `/opt/mema` without polluting your system or requiring heavy runtimes.
+**Mema** is a high-performance, shell-first framework designed for deterministic binary management. It is not a bloated package manager; it is lightweight infrastructure for managing isolated toolchains such as Go, Rust, Python, Node, Bun, and Deno primarily in `/opt/mema` without polluting your system or requiring heavy host runtimes.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey)](https://github.com/eugen252009/mema-core)
+[![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey)](https://github.com/coffeemakerstudio/mema)
 
 ---
 
@@ -16,7 +16,7 @@ Mema decouples **installation logic** (how a tool is built) from **distribution*
 ## 🏗️ Architecture
 The ecosystem consists of the Mema engine and its vendored recipe collection:
 
-1.  **[mema-core](https://github.com/eugen252009/mema-core):** The Engine. Handles caching, deterministic symlinking, and GPG-signed APT distribution.
+1.  **Mema core:** The engine in this repository. It handles caching, deterministic symlinking, and GPG-signed APT distribution.
 2.  **`recipes/`:** The vendored registry. A collection of shell-based recipes for fetching and verifying binaries.
 
 ---
@@ -31,9 +31,11 @@ curl -fsSL https://raw.githubusercontent.com/coffeemakerstudio/mema/main/install
 sudo apt update && sudo apt install mema
 ```
 
-The installer requires `curl`, `gpg`, and root access. The installed runtime
-requires `bash`, `curl`, `tar`, `jq`, and `fzf`; `sudo` is additionally needed
-when an unprivileged user activates a global installation.
+The installer requires `curl`, `gpg`, and root access. The core package
+declares its runtime dependencies, including `bash`, `curl`, `git`, `jq`,
+`tar`, `xz-utils`, `ca-certificates`, and `fzf`; `sudo` is used for global
+installation and activation when required. Individual recipes may add
+dependencies such as `unzip`.
 
 Release builds use the repository key published in `mema.gpg`. Set
 `MEMA_SIGNING_KEY` to the matching secret-key fingerprint when rotating or
@@ -80,25 +82,27 @@ removes Mema-managed package files, not downloaded toolchain directories; use
 ---
 
 ## 🛠️ Writing a Recipe
-A Mema recipe is pure shell script—adhering to Data-Oriented Design and avoiding "Architecture Astronaut" over-engineering.
+Recipes are small shell scripts sourced by the CLI with Bash. They define
+version discovery, verified installation, and link-only activation. The full
+recipe contract, environment variables, dependency metadata, architecture
+rules, and testing checklist are documented in
+[`HOW_TO_RECIPE.md`](HOW_TO_RECIPE.md).
 
-```bash
-mema_install() {
-    # Download into the verified Mema cache. It prints the cached path.
-    archive=$(mema_download "$URL" "tool.tar.gz" "$HASH")
-    
-    # Extract into the deterministic Mema directory
-    tar -C "$MEMA_INSTALL_DIR" -xzf "$archive"
-}
-    
-mema_use() {
-    # Activate an installed version without downloading or extracting again.
-    $MEMA_SUDO mkdir -p "$MEMA_LINK_DIR"
-    $MEMA_SUDO ln -sf "$MEMA_INSTALL_DIR/bin/tool" "$MEMA_LINK_DIR/tool"
-}
-```
+The essential rules are:
 
-Recipes receive `MEMA_INSTALL_DIR`, `MEMA_VERSION`, `MEMA_CACHE`, `MEMA_LINK_DIR`, `MEMA_LIB_DIR`, and, for an unprivileged activation of a global installation, `MEMA_SUDO=sudo`. Production recipes must provide an upstream SHA-256 and must not use `SKIP_HASH`.
+- Install only below `MEMA_INSTALL_DIR` and preserve side-by-side versions.
+- Use `mema_download URL FILENAME SHA256` for every upstream archive.
+- Define `mema_get_versions`, `mema_resolve_version`, `mema_install`, and
+  `mema_use`.
+- Make `mema_use` activation-only and link executables into `MEMA_LINK_DIR`.
+- Map architectures explicitly and fail clearly when unsupported.
+
+Run `./tests/check_recipes.sh` for a no-install recipe dry run. It validates
+recipe structure, version records, checksum fields, latest-version resolution,
+and Debian package generation without calling `mema_install`.
+
+For a single installed or explicit recipe, use `mema check-recipe <tool>` or
+`mema check-recipe <path/to/recipe.sh>`.
 
 Recipe packages can declare composed, pinned dependencies with
 `MEMA_INSTALL_DEPENDS`:
@@ -109,7 +113,7 @@ MEMA_AUTOINSTALL="1"
 MEMA_INSTALL_DEPENDS="lib-mylib 1.0.0"
 ```
 
-This generates `mema-myprogram=1.23.1`, adds
+This generates the package `mema-myprogram` at version `1.23.1`, adds
 `mema-lib-mylib (= 1.0.0)` as an APT recipe dependency, and its `postinst`
 first runs `mema install lib-mylib 1.0.0`, then installs the program. A program
 recipe can link against files activated by the library recipe through

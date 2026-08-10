@@ -1,5 +1,8 @@
 # How to Write a Mema Recipe
 
+> This is the legacy filename. The maintained guide is
+> [`HOW_TO_RECIPE.md`](HOW_TO_RECIPE.md).
+
 Mema uses small shell-first recipes to download, install, and activate isolated binary toolchains. The current CLI sources recipes with Bash; keep recipes POSIX-compatible where practical so they remain portable and auditable.
 
 ---
