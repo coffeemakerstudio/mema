@@ -12,9 +12,19 @@ The package must place the required Mema recipes, then build a pinned Wayland
 library stack through Mema. APT provides recipes and package ordering; Mema
 owns the isolated source builds and activation.
 
-This POC targets the Wayland protocol libraries and tools. It does not build a
-Wayland compositor or a complete desktop environment. Weston, Sway, Mutter,
-and similar projects are separate recipes and are outside this POC.
+This POC targets the Wayland protocol libraries and tools. Sway is implemented
+as the first compositor recipe in the separate `mema-sway` package; it is
+tested independently because a compositor requires hardware and session
+integration that the library POC does not.
+
+## First Compositor
+
+Sway is the first recommended compositor because it is lightweight, i3
+compatible, and has a bounded wlroots dependency. The initial package pins
+Sway 1.9 and wlroots 0.17.2 for Debian Bookworm compatibility. Xwayland,
+documentation generation, tray support, and optional image formats are
+disabled in this first build; they can be enabled by adding their recipes and
+runtime dependencies later.
 
 ## Architecture
 

@@ -22,14 +22,27 @@ mema_install() {
     work=$(mktemp -d)
     tar -xJf "$archive" -C "$work"
     source_dir="$work/wayland-protocols-1.43"
-    $sudo_cmd mkdir -p "$MEMA_INSTALL_DIR/share"
-    $sudo_cmd cp -a "$source_dir/stable" "$source_dir/unstable" "$MEMA_INSTALL_DIR/share/"
-    $sudo_cmd mkdir -p "$MEMA_SHARE_DIR"
+    $sudo_cmd mkdir -p "$MEMA_INSTALL_DIR/share/wayland-protocols" "$MEMA_INSTALL_DIR/share/pkgconfig" "$MEMA_SHARE_DIR" "$MEMA_PKG_CONFIG_DIR"
+    $sudo_cmd cp -a "$source_dir/stable" "$source_dir/staging" "$source_dir/unstable" "$MEMA_INSTALL_DIR/share/wayland-protocols/"
+    $sudo_cmd sh -c "cat > '$MEMA_INSTALL_DIR/share/pkgconfig/wayland-protocols.pc' <<EOF
+prefix=$MEMA_INSTALL_DIR
+datadir=$MEMA_INSTALL_DIR/share
+pkgdatadir=$MEMA_INSTALL_DIR/share/wayland-protocols
+Name: wayland-protocols
+Description: Wayland protocols
+Version: $MEMA_PACKAGE_VERSION
+EOF"
     mema_use
     rm -rf "$work"
 }
 
 mema_use() {
+    local file destination
     local sudo_cmd="${MEMA_SUDO:-}"
     $sudo_cmd ln -sfn "$MEMA_INSTALL_DIR/share/wayland-protocols" "$MEMA_SHARE_DIR/wayland-protocols"
+    for file in "$MEMA_INSTALL_DIR"/lib/pkgconfig/*.pc "$MEMA_INSTALL_DIR"/share/pkgconfig/*.pc; do
+        [ -f "$file" ] || continue
+        destination="$MEMA_PKG_CONFIG_DIR/${file##*/}"
+        $sudo_cmd ln -sfn "$file" "$destination"
+    done
 }
