@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.0.1}"
+VERSION="${VERSION:-0.2}"
 DIST_DIR="dist"
 DEB_DIR="debs"
 
