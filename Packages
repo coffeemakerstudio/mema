@@ -5,10 +5,10 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
 Filename: ./mema_0.0.1_amd64.deb
-Size: 1756474
-MD5sum: 8d688faeb8b6f7cfa3688a5ab93d3284
-SHA1: dd5596ab75bdc95f011f0c0aabc4555eadf18aae
-SHA256: 1ecda2a59923193c2e69bd1365d7781f966a830e30711a1c1f644b07709fbe54
+Size: 1756468
+MD5sum: c296ade367c600640cc75694bba5897e
+SHA1: c5fb1f668ed8119706e2d08bbd8a431e974c4024
+SHA256: f3f6f7e3adfce927733fadf38323e7e2eec5b95687ba8faa0093f867ae2289c1
 Section: admin
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
@@ -16,15 +16,15 @@ Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
 
 Package: mema-go
-Version: 0.1
+Version: 1.26.5
 Architecture: all
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema
-Filename: ./mema-go_0.1_all.deb
-Size: 1854
-MD5sum: 3ae2db3f50288d8202d6a2dfd04fcc49
-SHA1: 7fe5cf4ae7ef892a913d5c49812aa2755161fdc7
-SHA256: c17091e16a4fad549549c6ddc13a3348e9ac7e95d2ed2cc4cda4bf227732db42
+Filename: ./mema-go_1.26.5_all.deb
+Size: 1870
+MD5sum: 32ed9c91f5684cfffe3a6e3ad1fad8c1
+SHA1: 802b74afc0b4870bec0d24034ec065c3816985f4
+SHA256: a45389cfd2f19dce290ee27ad42f6265d1ffc53f5ea4c68d5e971c203c9f3259
 Section: devel
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
@@ -37,9 +37,9 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-go
 Filename: ./mema-go-latest_1_all.deb
 Size: 668
-MD5sum: f8284ed9d0a9ada8b9dcafe9dee43230
-SHA1: 9f61234e64827b0e30ddea5d23014efa6d4e6f6f
-SHA256: 3c58d578536bc1a51204b1bcefeec92364a5689657df810306a90d262e61b79d
+MD5sum: 357b16721437c87379d6cd6e75d84ff0
+SHA1: 8b1a49b96bbcaccb43e207168cf7677034dbd3c7
+SHA256: 212abeb57540d7251bd81f8dafbb7fe640a73a5b82699538c6cd9ff612b7a80f
 Section: devel
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
