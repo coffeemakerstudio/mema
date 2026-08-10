@@ -19,7 +19,7 @@ jobs:
       - name: Set up Environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev apt-utils docker.io gnupg
+          sudo apt-get install -y dpkg-dev apt-utils gnupg
 
       - name: Set up Go
         uses: actions/setup-go@v5
