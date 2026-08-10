@@ -17,5 +17,7 @@ RUN apt-get update && \
 RUN echo 'package main; import "fmt"; func main() { fmt.Println("Mema Smoke Test: OK") }' > /tmp/hello.go && \
     /usr/local/bin/go run /tmp/hello.go && \
     rm /tmp/hello.go && \
+    test -x /usr/local/bin/mema && \
+    test -f /etc/profile.d/mema.sh && \
     mema list && \
     test -L /usr/local/bin/go

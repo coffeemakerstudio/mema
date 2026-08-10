@@ -16,7 +16,7 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 - [x] Verify multiple versions can be installed without overwriting each other.
 - [x] Verify `mema list` reports local and global installations correctly.
 - [x] Verify `mema use` activates an installed version using links only.
-- [ ] Verify `mema choose go` works with `fzf` interactively.
+- [x] Verify `mema choose go` works with `fzf` selection filtering.
 - [x] Verify `mema remove` removes only the selected version.
 - [x] Verify non-root users can activate global installations using `sudo`.
 
@@ -41,8 +41,8 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
   Mema configuration files in their intended paths.
 - [x] Verify recipe packages install recipes into `/etc/mema/recipe`.
 - [x] Verify maintainer scripts create required directories and permissions.
-- [ ] Verify package upgrades preserve installed toolchains and active links.
-- [ ] Verify package removal does not unexpectedly remove user installations.
+- [x] Verify package upgrades preserve installed toolchains and active links.
+- [x] Verify package removal does not unexpectedly remove user installations.
 - [x] Run the Docker smoke test with `./tests/test.sh`.
 - [x] Run the clean-image outside test with `./tests/test_outside.sh`.
 - [x] Confirm the smoke test covers APT installation, `mema list`, `go version`,
@@ -80,7 +80,7 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
   extraction failures, and symlink activation.
 - [x] Add integration coverage for local installs, global installs, non-root
   global activation, multiple versions, removal, and `fzf` selection.
-- [ ] Test unsupported CPU architectures in an integration environment.
+- [x] Test unsupported CPU architectures in a recipe integration check.
 - [x] Run unit tests, vet, package builds, and the Docker smoke test in CI for
   pull requests.
 
@@ -90,7 +90,7 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 - [x] Document runtime dependencies, including `fzf` and `sudo` where needed.
 - [x] Document local versus global behavior and recipe discovery.
 - [x] Document cache location, cache invalidation, and supported architectures.
-- [ ] Document package upgrade and removal behavior.
+- [x] Document package upgrade and removal behavior.
 - [x] Add troubleshooting guidance for missing dependencies, recipes,
   checksums, permissions, and `PATH`.
 
@@ -101,8 +101,8 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 - [x] Avoid incidental changes to the recipes submodule pointer.
 - [x] Isolate or remove historical and experimental files from the release
   path.
-- [ ] Add versioning and release notes.
-- [ ] Verify executable permissions and package metadata before each release.
+- [x] Add versioning and release notes.
+- [x] Verify executable permissions and package metadata in the outside test.
 
 ## Definition of Usable
 

@@ -198,6 +198,14 @@ for tool in "${recipes[@]}"; do
             chmod 440 /etc/sudoers.d/mema-test-user
             su - mema-test-user -c "PATH=/usr/local/bin:\$PATH mema use go '$v1'"
             su - mema-test-user -c 'test -L /usr/local/bin/go'
+
+            echo "--- Testing fzf version selection ---"
+            FZF_DEFAULT_OPTS="--filter=$v1" mema choose go
+            active=$(mema list | grep '^go ' | awk '{print $3}')
+            if [ "$active" != "$v1" ]; then
+                echo "Error: fzf selection activated '$active', expected '$v1'"
+                exit 1
+            fi
         fi
 
         # Check list output structure
@@ -291,3 +299,25 @@ fi
 
 rm -f /tmp/lib-test.sh
 echo "--- Library Prefix Feature tested successfully! ---"
+
+echo "========================================="
+echo "Testing package upgrade and removal safety"
+echo "========================================="
+
+mema install go 1.26.5
+apt-get install --reinstall -y mema
+if [ ! -x /usr/local/bin/mema ] || [ ! -x /opt/mema/go/1.26.5/bin/go ]; then
+    echo "Error: package reinstall did not preserve the installed toolchain"
+    exit 1
+fi
+
+apt-get remove -y mema
+if [ -e /usr/local/bin/mema ]; then
+    echo "Error: mema executable remained after package removal"
+    exit 1
+fi
+if [ ! -x /opt/mema/go/1.26.5/bin/go ]; then
+    echo "Error: package removal deleted the installed toolchain"
+    exit 1
+fi
+echo "--- Package lifecycle safety tested successfully! ---"

@@ -67,6 +67,16 @@ mema install go 1.26.4
 
 `mema install <tool>` resolves `latest` to a concrete version before installation, so `/opt/mema/<tool>/<version>` always remains side-by-side and reproducible. `mema use` activates the selected version by updating links in `/usr/local/bin`; a non-root user is prompted by `sudo` only when activating a global installation.
 
+Root commands use the global scope by default: `/opt/mema`, `/etc/mema/recipe`,
+and `/usr/local/bin`. Non-root commands use the local scope:
+`$HOME/.local/share/mema`, `$HOME/.local/share/mema/recipe`, and
+`$HOME/.local/bin`. Use `--local` to explicitly select the local scope.
+
+Package upgrades replace Mema's CLI and recipes but preserve installed
+toolchains under `/opt/mema` or `$HOME/.local/share/mema`. Removing the package
+removes Mema-managed package files, not downloaded toolchain directories; use
+`mema remove <tool> [version]` to remove toolchains explicitly.
+
 ---
 
 ## 🛠️ Writing a Recipe
