@@ -100,16 +100,21 @@ mema_use() {
 
 Recipes receive `MEMA_INSTALL_DIR`, `MEMA_VERSION`, `MEMA_CACHE`, `MEMA_LINK_DIR`, `MEMA_LIB_DIR`, and, for an unprivileged activation of a global installation, `MEMA_SUDO=sudo`. Production recipes must provide an upstream SHA-256 and must not use `SKIP_HASH`.
 
-Recipe packages can declare composed dependencies with `MEMA_DEPENDS`:
+Recipe packages can declare composed, pinned dependencies with
+`MEMA_INSTALL_DEPENDS`:
 
 ```sh
-MEMA_DEPENDS="lib-mylib"
+MEMA_PACKAGE_VERSION="1.23.1"
+MEMA_AUTOINSTALL="1"
+MEMA_INSTALL_DEPENDS="lib-mylib 1.0.0"
 ```
 
-The package builder adds `mema-lib-mylib-latest` as an APT dependency and its
-`postinst` first runs `mema install lib-mylib latest`, then installs the program.
-A program recipe can link against files activated by the library recipe through
-`$MEMA_LIB_DIR`.
+This generates `mema-myprogram=1.23.1`, adds
+`mema-lib-mylib (= 1.0.0)` as an APT recipe dependency, and its `postinst`
+first runs `mema install lib-mylib 1.0.0`, then installs the program. A program
+recipe can link against files activated by the library recipe through
+`$MEMA_LIB_DIR`. Legacy recipes may still use `MEMA_DEPENDS` for latest-package
+behavior.
 
 ## Troubleshooting
 

@@ -29,8 +29,12 @@ NAME="tool-name"
 DESCRIPTION="A description of the tool package."
 MAINTAINER="Your Name <email@example.com>"
 SECTION="devel"
-# Optional whitespace-separated Mema recipes installed before this recipe.
-MEMA_DEPENDS="lib-mylib"
+# Exact package version for a pinned upstream release.
+MEMA_PACKAGE_VERSION="1.23.1"
+# Make this package the autoinstall entry point.
+MEMA_AUTOINSTALL="1"
+# Whitespace-separated recipe/version pairs installed first.
+MEMA_INSTALL_DEPENDS="lib-mylib 1.0.0"
 
 # Keep the shell script execution strict
 set -e
@@ -57,11 +61,16 @@ When Mema executes your recipe, it supplies several environment variables. You *
 
 A Mema recipe must define the following four functions:
 
-`MEMA_DEPENDS` is optional. It contains recipe names, not Debian package names.
-The recipe package builder adds matching `mema-<dependency>-latest` package
-dependencies and writes `mema install <dependency> latest` commands into the
-latest-package `postinst`. This keeps APT responsible for placing recipes while
-Mema performs the actual toolchain installation.
+`MEMA_PACKAGE_VERSION` should match the pinned upstream release. A recipe with
+`MEMA_AUTOINSTALL=1` becomes a versioned `mema-<tool>` package. Its
+`MEMA_INSTALL_DEPENDS` value contains recipe/version pairs, not Debian package
+names. The builder adds exact `mema-<dependency> (= <version>)` APT
+dependencies and writes matching `mema install <dependency> <version>` commands
+into the package `postinst`. This keeps APT responsible for placing recipes
+while Mema performs the actual toolchain installation.
+
+`MEMA_DEPENDS` remains available for legacy `mema-<tool>-latest` packages. It
+contains recipe names and installs those dependencies at `latest`.
 
 For example, a program that links against `lib-mylib` can use the library's
 stable files through `$MEMA_LIB_DIR`:

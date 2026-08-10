@@ -4,6 +4,7 @@ NAME="go"
 DESCRIPTION="mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated."
 MAINTAINER="Coffee Maker Studio <mema@lupricht.net>"
 SECTION="devel"
+MEMA_PACKAGE_VERSION="1.26.5"
 
 set -e
 
