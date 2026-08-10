@@ -19,6 +19,7 @@ fi
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
+mkdir -p "$DEB_DIR/DEBIAN" "$DEB_DIR/usr/local/bin" "$DEB_DIR/opt/mema/config.d"
 
 printf '%s\n' "--- Building mema $VERSION ---"
 (
