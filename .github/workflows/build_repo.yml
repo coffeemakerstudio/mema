@@ -36,14 +36,10 @@ jobs:
           git_commit_gpgsign: true
 
       # The imported secret key must match the fingerprint published in mema.gpg.
-      # Set MEMA_SIGNING_KEY when rotating the repository key.
 
       - name: Build Packages
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            if [ -n "${{ secrets.MEMA_SIGNING_KEY }}" ]; then
-              export MEMA_SIGNING_KEY="${{ secrets.MEMA_SIGNING_KEY }}"
-            fi
             MEMA_SIGN=1 ./build-repo.sh
           else
             ./build-repo.sh
