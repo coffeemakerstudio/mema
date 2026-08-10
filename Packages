@@ -5,10 +5,10 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
 Filename: ./mema_0.0.1_amd64.deb
-Size: 1756478
-MD5sum: 02da4006f708700434f86ede3c994e96
-SHA1: 0a4ff658e90f6a0f08b7ad14220ede54532f46ea
-SHA256: 96c006e9dab5368c5b2daef893c178addd8b7e8b942855a504227f2cf2f2ef55
+Size: 1756526
+MD5sum: b5ced98daf0533e7dd054c0a8fad5278
+SHA1: 96a54f9cf55ff7841e8a41127d7989007d32360d
+SHA256: 25b5abcecc1befbcd81b0cf223b67a77ec56ba76d9175161606685360cbe1ffd
 Section: admin
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
@@ -22,9 +22,9 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema
 Filename: ./mema-go_0.1_all.deb
 Size: 1852
-MD5sum: ae23b53579d0c223abb17959ad2d5f37
-SHA1: 09d42e5d767ac235e24227439fb449c36c8ecd15
-SHA256: 2da48ccaebe3cd0c76d2c7689d8d4ce4966030c831e5de12470acdf0653e5b7a
+MD5sum: a800de99afb693d920147b95765618b8
+SHA1: f5a590ed7bb1b453f4630c51880044fc883ec6ec
+SHA256: 4dffa249986e84f6d5e1a203cd4633024d9cee9109bdf4d59a4456c39506b57c
 Section: devel
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
@@ -37,9 +37,9 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-go
 Filename: ./mema-go-latest_1_all.deb
 Size: 668
-MD5sum: 4b81b125a6ddc43249bceb6556d87b3e
-SHA1: 7129889afdc0f3808f6385d075e36eff66684f3a
-SHA256: 86f95c60599a9ce4118cd292a0b526a131321d22880d6dfb171555d4cc6a1b85
+MD5sum: 3e9f965447ad403bacbcfcfca8ae2335
+SHA1: c65d5ea8913c9c7bb85a1607d730e91f0138c9f0
+SHA256: c5bd0f9577f06f2684a3e54f078a58af27c83a68a08d694b09fc9a00ff582335
 Section: devel
 Priority: optional
 Homepage: https://github.com/coffeemakerstudio/mema
