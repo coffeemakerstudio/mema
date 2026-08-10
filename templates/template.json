@@ -5,7 +5,7 @@
 		"architecture": "{{ARCH}}",
 		"maintainer": "Coffee Maker Studio <mema@lupricht.net>",
 		"description": "The Minimalist Meta-Manager\n Who needs an OS when you have apt and sh?\n Mema is a lightweight POSIX-sh framework to manage binaries \n and completions in /opt and /etc without the bloat.",
-		"depends": "curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf",
+		"depends": "curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo",
 		"homepage": "https://github.com/coffeemakerstudio/mema",
 		"section": "admin",
 		"recommends":"unzip",

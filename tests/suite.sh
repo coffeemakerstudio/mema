@@ -191,6 +191,15 @@ for tool in "${recipes[@]}"; do
 
         test_tool_execution "$tool" "$v1"
 
+        if [ "$tool" = "go" ]; then
+            echo "--- Testing non-root activation of global installation ---"
+            useradd --create-home --shell /bin/bash mema-test-user
+            printf '%s\n' 'mema-test-user ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/mema-test-user
+            chmod 440 /etc/sudoers.d/mema-test-user
+            su - mema-test-user -c "PATH=/usr/local/bin:\$PATH mema use go '$v1'"
+            su - mema-test-user -c 'test -L /usr/local/bin/go'
+        fi
+
         # Check list output structure
         echo "Checking mema list output:"
         mema list
@@ -282,4 +291,3 @@ fi
 
 rm -f /tmp/lib-test.sh
 echo "--- Library Prefix Feature tested successfully! ---"
-

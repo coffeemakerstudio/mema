@@ -21,7 +21,7 @@ jobs:
       - name: Set up Environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev apt-utils
+          sudo apt-get install -y dpkg-dev apt-utils docker.io gnupg
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -42,13 +42,28 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
+      # The imported secret key must match the fingerprint published in mema.gpg.
+      # Set MEMA_SIGNING_KEY when rotating the repository key.
+
       - name: Build Packages
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            if [ -n "${{ secrets.MEMA_SIGNING_KEY }}" ]; then
+              export MEMA_SIGNING_KEY="${{ secrets.MEMA_SIGNING_KEY }}"
+            fi
             MEMA_SIGN=1 ./build-repo.sh
           else
             ./build-repo.sh
           fi
+
+      - name: Run helper tests
+        run: ./tests/test_helpers.sh
+
+      - name: Run Go tests and vet
+        run: |
+          cd mema-go
+          go test ./...
+          go vet ./...
 
       - name: Run Docker Integration Test
         run: |

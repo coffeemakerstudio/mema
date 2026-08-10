@@ -11,10 +11,18 @@ cleanup() {
 trap cleanup EXIT
 
 echo "--- Starting minimal Debian test container ---"
-docker run -d --rm --name "$CONTAINER_NAME" -v "$REPO_DIR:/repo:ro" debian:bookworm-slim sleep infinity
+docker run -d --rm --name "$CONTAINER_NAME" \
+    -v "$REPO_DIR:/repo:ro" \
+    debian:bookworm-slim sleep infinity
 
 docker exec "$CONTAINER_NAME" bash -c '
-    echo "deb [trusted=yes] file:///repo ./" > /etc/apt/sources.list.d/mema-test.list
+    if [ -f /repo/InRelease ]; then
+        mkdir -p /etc/apt/keyrings
+        cp /repo/mema-keyring.gpg /etc/apt/keyrings/mema.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/mema.gpg] file:///repo ./" > /etc/apt/sources.list.d/mema-test.list
+    else
+        echo "deb [trusted=yes] file:///repo ./" > /etc/apt/sources.list.d/mema-test.list
+    fi
     apt-get update
     apt-get install -y mema-go-latest
 '

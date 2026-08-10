@@ -27,9 +27,17 @@ The ecosystem consists of two decoupled repositories:
 Mema is distributed via a custom, GPG-signed APT repository. Install the core system with a single command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/eugen252009/mema-core/refs/heads/main/install_repo.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/coffeemakerstudio/mema/main/install_repo.sh | sudo bash
 sudo apt update && sudo apt install mema
 ```
+
+The installer requires `curl`, `gpg`, and root access. The installed runtime
+requires `bash`, `curl`, `tar`, `jq`, and `fzf`; `sudo` is additionally needed
+when an unprivileged user activates a global installation.
+
+Release builds use the repository key published in `mema.gpg`. Set
+`MEMA_SIGNING_KEY` to the matching secret-key fingerprint when rotating or
+building with a different GPG key.
 
 ### 2. Install Toolchains
 Choose the specific languages or tools you need. You can lock specific versions or use the `-latest` meta-package for automated updates:
@@ -82,10 +90,24 @@ mema_use() {
 
 Recipes receive `MEMA_INSTALL_DIR`, `MEMA_VERSION`, `MEMA_CACHE`, `MEMA_LINK_DIR`, `MEMA_LIB_DIR`, and, for an unprivileged activation of a global installation, `MEMA_SUDO=sudo`. Production recipes must provide an upstream SHA-256 and must not use `SKIP_HASH`.
 
+## Troubleshooting
+
+- If `mema` cannot be found after installation, start a new login shell and
+  ensure `/usr/local/bin` or `$HOME/.local/bin` is in `PATH`.
+- If interactive commands fail, install `fzf` and run `mema use` again.
+- If `mema` reports a missing recipe, install `mema-<tool>` or pass
+  `--file <recipe>`.
+- If a checksum fails, do not bypass verification. Refresh the recipe metadata
+  and retry with the upstream checksum.
+- If global activation fails for a non-root user, verify that `sudo` is
+  installed and permitted for the user.
+- Downloads are cached in `/tmp/mema/cache`; corrupt cached archives are
+  removed automatically after verification fails.
+
 ---
 
 ## 🧼 Why Mema?
-*   **Zero Runtime Bloat:** No dependency on Python, Node, or Go on the host system. Requires only `sh`, `curl`, and `tar`.
+*   **Zero Runtime Bloat:** No dependency on Python, Node, or Go on the host system. Requires only lightweight shell, download, archive, JSON, and selection tools.
 *   **Deterministic Environments:** Predictable paths in `/opt/mema` ensure reproducible development setups.
 *   **Side-by-Side Versions:** Run multiple versions of the same software simultaneously without conflicts.
 *   **CI/CD Driven:** Automated pipeline that builds, signs, and deploys Debian packages via GitHub Actions and GitHub Pages.

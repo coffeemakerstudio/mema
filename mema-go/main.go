@@ -166,6 +166,9 @@ func initialize(s scope) error {
 }
 
 func findRecipe(name string, s scope, explicit string) (string, error) {
+	if err := validatePathComponent(name, "tool"); err != nil {
+		return "", err
+	}
 	if explicit != "" {
 		path, err := filepath.Abs(os.ExpandEnv(explicit))
 		if err != nil {
@@ -255,12 +258,18 @@ func resolveVersion(recipe, version string) (string, error) {
 }
 
 func install(name, version string, s scope, explicitRecipe string) error {
+	if err := validatePathComponent(name, "tool"); err != nil {
+		return err
+	}
 	recipe, err := findRecipe(name, s, explicitRecipe)
 	if err != nil {
 		return err
 	}
 	version, err = resolveVersion(recipe, version)
 	if err != nil {
+		return err
+	}
+	if err := validatePathComponent(version, "version"); err != nil {
 		return err
 	}
 	var installDir string
@@ -511,7 +520,7 @@ func list(s scope, includeGlobal bool) error {
 	fmt.Println("--------------------------------------------------------------")
 	byName := make(map[string][]installation)
 	for _, item := range items {
-		if item.name == "lib" || item.name == "recipe" || strings.HasPrefix(item.name, "lib-") {
+		if item.name == "lib" || item.name == "recipe" {
 			continue
 		}
 		key := item.scope.name + "\x00" + item.name
@@ -566,6 +575,14 @@ func activeVersion(s scope, name string) string {
 }
 
 func remove(args []string, s scope) error {
+	if err := validatePathComponent(args[0], "tool"); err != nil {
+		return err
+	}
+	if len(args) == 2 {
+		if err := validatePathComponent(args[1], "version"); err != nil {
+			return err
+		}
+	}
 	items, err := installed(s, false)
 	if err != nil {
 		return err
@@ -607,7 +624,15 @@ func removeInstallation(item installation) error {
 		for _, entry := range entries {
 			link := filepath.Join(item.scope.linkDir, entry.Name())
 			target, err := filepath.EvalSymlinks(link)
-			if err == nil && strings.HasPrefix(target, installDir+string(filepath.Separator)) {
+			if err != nil {
+				// EvalSymlinks fails for dangling links; inspect the raw target so
+				// stale links owned by this installation are still cleaned up.
+				rawTarget, readErr := os.Readlink(link)
+				if readErr == nil {
+					target = rawTarget
+				}
+			}
+			if strings.HasPrefix(target, installDir+string(filepath.Separator)) {
 				if err := os.Remove(link); err != nil {
 					return fmt.Errorf("remove link %s: %w", link, err)
 				}
@@ -616,6 +641,13 @@ func removeInstallation(item installation) error {
 	}
 	if err := os.RemoveAll(installDir); err != nil {
 		return fmt.Errorf("remove %s: %w", installDir, err)
+	}
+	return nil
+}
+
+func validatePathComponent(value, label string) error {
+	if value == "" || value == "." || value == ".." || strings.ContainsAny(value, `/\\`) {
+		return fmt.Errorf("invalid %s %q", label, value)
 	}
 	return nil
 }

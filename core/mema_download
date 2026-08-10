@@ -13,6 +13,17 @@ cache_dir="${MEMA_CACHE:-/tmp/mema/cache}"
 cached_file="$cache_dir/$filename"
 temporary_file="$cached_file.part"
 
+case "$url" in
+    https://*) ;;
+    *) printf 'Mema: download URL must use HTTPS\n' >&2; exit 1 ;;
+esac
+case "$expected_hash" in
+    *[!0123456789abcdefABCDEF]*|'') printf 'Mema: SHA-256 must be exactly 64 hexadecimal characters\n' >&2; exit 1 ;;
+    ????????????????????????????????????????????????????????????????) ;;
+    *) printf 'Mema: SHA-256 must be exactly 64 hexadecimal characters\n' >&2; exit 1 ;;
+esac
+[ "$filename" != "." ] && [ "$filename" != ".." ] || { printf 'Mema: invalid download filename\n' >&2; exit 1; }
+
 mkdir -p "$cache_dir"
 
 if [ -f "$cached_file" ] && mema_verify "$cached_file" "$expected_hash"; then
@@ -21,7 +32,7 @@ if [ -f "$cached_file" ] && mema_verify "$cached_file" "$expected_hash"; then
 fi
 
 rm -f "$cached_file" "$temporary_file"
-if ! curl --fail --location --retry 3 --output "$temporary_file" "$url"; then
+if ! curl --fail --location --proto '=https' --tlsv1.2 --retry 3 --output "$temporary_file" "$url"; then
     printf 'Mema: download failed for %s\n' "$url" >&2
     rm -f "$temporary_file"
     exit 1

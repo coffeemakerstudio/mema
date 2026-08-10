@@ -8,6 +8,15 @@ DEB_DIR="debs"
 command -v tpa >/dev/null || { printf 'tpa is required to build packages.\n' >&2; exit 1; }
 command -v dpkg-scanpackages >/dev/null || { printf 'dpkg-scanpackages is required.\n' >&2; exit 1; }
 command -v apt-ftparchive >/dev/null || { printf 'apt-ftparchive is required.\n' >&2; exit 1; }
+command -v go >/dev/null || { printf 'go is required to build the CLI.\n' >&2; exit 1; }
+if [ "${MEMA_SIGN:-0}" = "1" ]; then
+    command -v gpg >/dev/null || { printf 'gpg is required when MEMA_SIGN=1.\n' >&2; exit 1; }
+    SIGNING_KEY="${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}"
+    gpg --batch --list-secret-keys "$SIGNING_KEY" >/dev/null 2>&1 || {
+        printf 'A secret key matching MEMA_SIGNING_KEY (%s) is required.\n' "$SIGNING_KEY" >&2
+        exit 1
+    }
+fi
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
@@ -24,7 +33,8 @@ install -m 0755 core/mema_find_recipes "$DEB_DIR/usr/local/bin/mema_find_recipes
 install -m 0755 core/mema_list "$DEB_DIR/usr/local/bin/mema_list"
 install -m 0755 core/mema_verify "$DEB_DIR/usr/local/bin/mema_verify"
 install -m 0644 configs/00-mema-init.sh "$DEB_DIR/opt/mema/config.d/00-init.sh"
-install -m 0644 configs/mema-loader.sh "$DEB_DIR/etc/profile.d/mema.sh/mema-loader.sh"
+rm -rf "$DEB_DIR/etc/profile.d/mema.sh"
+install -D -m 0644 configs/mema-loader.sh "$DEB_DIR/etc/profile.d/mema.sh"
 
 json=$(sed \
     -e "s|{{VERSION}}|$VERSION|g" \
@@ -46,17 +56,20 @@ if [ "${#recipe_packages[@]}" -eq 0 ]; then
     printf 'No recipe packages were built.\n' >&2
     exit 1
 fi
-cp "${recipe_packages[@]}" "$DIST_DIR/"
+    cp "${recipe_packages[@]}" "$DIST_DIR/"
 
 (
     cd "$DIST_DIR"
     dpkg-scanpackages . /dev/null > Packages
     gzip -kf Packages
+    if [ "${MEMA_SIGN:-0}" = "1" ]; then
+        gpg --batch --yes --dearmor -o mema-keyring.gpg ../mema.gpg
+    fi
     apt-ftparchive release . > Release
 
     if [ "${MEMA_SIGN:-0}" = "1" ]; then
-        gpg --batch --yes --clearsign --digest-algo SHA256 -o InRelease Release
-        gpg --batch --yes --armor --detach-sign --digest-algo SHA256 -o Release.gpg Release
+        gpg --batch --yes --local-user "$SIGNING_KEY" --clearsign --digest-algo SHA256 -o InRelease Release
+        gpg --batch --yes --local-user "$SIGNING_KEY" --armor --detach-sign --digest-algo SHA256 -o Release.gpg Release
     fi
 )
 
