@@ -5,7 +5,6 @@ VERSION="${VERSION:-0.0.1}"
 DIST_DIR="dist"
 DEB_DIR="debs"
 
-command -v tpa >/dev/null || { printf 'tpa is required to build packages.\n' >&2; exit 1; }
 command -v dpkg-scanpackages >/dev/null || { printf 'dpkg-scanpackages is required.\n' >&2; exit 1; }
 command -v apt-ftparchive >/dev/null || { printf 'apt-ftparchive is required.\n' >&2; exit 1; }
 command -v go >/dev/null || { printf 'go is required to build the CLI.\n' >&2; exit 1; }
@@ -36,13 +35,20 @@ install -m 0644 configs/00-mema-init.sh "$DEB_DIR/opt/mema/config.d/00-init.sh"
 rm -rf "$DEB_DIR/etc/profile.d/mema.sh"
 install -D -m 0644 configs/mema-loader.sh "$DEB_DIR/etc/profile.d/mema.sh"
 
-json=$(sed \
-    -e "s|{{VERSION}}|$VERSION|g" \
-    -e 's|{{ARCH}}|amd64|g' \
-    -e "s|{{OUT_DIR}}|$DEB_DIR|g" \
-    templates/template.json)
-printf '%s\n' "$json" | tpa json
-tpa build -in="$DEB_DIR" -out="$DIST_DIR"
+cat > "$DEB_DIR/DEBIAN/control" <<EOF
+Package: mema
+Version: $VERSION
+Architecture: amd64
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
+Recommends: unzip
+Homepage: https://github.com/coffeemakerstudio/mema
+Section: admin
+Priority: optional
+Description: The Minimalist Meta-Manager
+ Mema manages verified, isolated binary toolchains without polluting /usr/bin.
+EOF
+dpkg-deb --build "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_amd64.deb" >/dev/null
 
 printf '%s\n' '--- Building recipe packages ---'
 (

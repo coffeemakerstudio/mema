@@ -26,11 +26,6 @@ jobs:
         with:
           go-version-file: mema-go/go.mod
 
-      - name: Install Template Package Assembler
-        run: |
-          go install github.com/eugen252009/tpa@latest
-          echo "$HOME/go/bin" >> "$GITHUB_PATH"
-
       - name: Import GPG Key
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: crazy-max/ghaction-import-gpg@v6

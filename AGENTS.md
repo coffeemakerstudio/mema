@@ -21,7 +21,7 @@ Treat this contract as the target behavior. Do not remove or weaken an advertise
 | `core/` | Packaged runtime executables and shell helpers. `core/mema` is a compiled Linux amd64 Go binary; `mema_old` is a legacy shell implementation kept for reference only. |
 | `configs/` | Shell configuration loaded from `/etc/profile.d/mema.sh`; defaults live in `00-mema-init.sh`. |
 | `debs/` | Debian package staging tree for the core package, including control metadata and installed files. |
-| `templates/` | Template Package Assembler (`tpa`) input for the core package. |
+| `templates/` | Package metadata reference templates. |
 | `recipes/` | Vendored tool recipes and recipe package build files. |
 | `build-repo.sh` | Builds the core and recipe Debian packages, then writes the APT index into `dist/`. |
 | `scripts/package.sh` | Compatibility entry point that delegates to `build-repo.sh`. |
@@ -84,7 +84,7 @@ go build -o ../core/mema .
 
 ### Debian And Repository Build
 
-The current build scripts require Debian packaging tools, Docker for the integration test, `tpa`, `dpkg-scanpackages`, `apt-ftparchive`, and GPG signing credentials when generating a release repository.
+The current build scripts require Debian packaging tools, Docker for the integration test, `dpkg-deb`, `dpkg-scanpackages`, `apt-ftparchive`, and GPG signing credentials when generating a release repository.
 
 ```sh
 ./build-repo.sh
@@ -95,18 +95,9 @@ MEMA_SIGN=1 ./build-repo.sh
 
 `build-repo.sh` builds the Go binary, synchronizes the Debian staging tree, builds recipe packages, and generates `Packages`, `Packages.gz`, and `Release`. Set `MEMA_SIGN=1` only when a release GPG key is available; this additionally produces `InRelease` and `Release.gpg`. CI imports the signing key, uses that mode, and then runs the Docker test.
 
-### Template Package Assembler
-
-[`tpa`](https://github.com/eugen252009/tpa) is the package-staging tool used by the core and recipe builders. It requires Go 1.26.3 or later to build, plus `dpkg-deb`; `gzip` and GPG are additionally required for repository metadata and signing.
-
-- `tpa init` creates a package root with Debian control metadata, maintainer scripts, and `usr/local/bin`.
-- `tpa json` reads a JSON document from standard input and initializes that package root. It requires package name, version, architecture, maintainer, description, and `outdir`; it does not build the `.deb`.
-- `tpa build -in=PACKAGE_ROOT -out=OUTPUT_DIR` runs `dpkg-deb` to create the package.
-- `tpa pack` can generate a structured APT repository with `Packages`, `Packages.gz`, and `dists/stable/Release` metadata.
-
-TPA maintainer-script fields (`postinstbody`, `preinstbody`, `prermbody`, and `postrmbody`) are script contents, not file paths. The core and recipe templates pass these through JSON.
-
-Do not replace the current `dpkg-scanpackages` and `apt-ftparchive` repository generation in `build-repo.sh` with `tpa pack` without first addressing TPA's current repository limitations: it writes fixed repository metadata and only copies `.deb` files into its `pool/` when signing with `-gpg`. An unsigned TPA repository is therefore not installable as-is.
+Package staging and builds use `dpkg-deb` directly. Repository indexes are
+generated with `dpkg-scanpackages` and `apt-ftparchive`; signed builds additionally
+require GPG.
 
 ## Verification Scope
 
