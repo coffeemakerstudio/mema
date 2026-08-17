@@ -3,6 +3,7 @@ NAME="bun"
 DESCRIPTION="Mema-managed Bun JavaScript runtime"
 SECTION="javascript"
 MEMA_PACKAGE_VERSION="1.3.14"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl, unzip"
 
 set -e

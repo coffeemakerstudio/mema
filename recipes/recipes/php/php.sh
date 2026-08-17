@@ -4,6 +4,7 @@ DESCRIPTION="Mema-managed PHP CLI runtime"
 SECTION="web"
 MEMA_PACKAGE_VERSION="8.5.9"
 MEMA_AUTOINSTALL="1"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="build-essential, autoconf, bison, re2c, pkg-config, libssl-dev, zlib1g-dev"
 
 set -e

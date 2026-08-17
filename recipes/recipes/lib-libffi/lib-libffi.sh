@@ -3,6 +3,7 @@ NAME="lib-libffi"
 DESCRIPTION="Mema-managed libffi development library"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="3.4.4"
+MEMA_SUPPORTED_ARCHES="amd64"
 deps="gcc, make, libc6-dev"
 
 set -e

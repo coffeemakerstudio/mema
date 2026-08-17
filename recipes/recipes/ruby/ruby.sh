@@ -4,6 +4,7 @@ DESCRIPTION="Mema-managed Ruby runtime"
 SECTION="devel"
 MEMA_PACKAGE_VERSION="3.4.10"
 MEMA_AUTOINSTALL="1"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="build-essential, autoconf, bison, libssl-dev, libyaml-dev, libreadline-dev, zlib1g-dev, libncurses-dev, libffi-dev"
 
 set -e

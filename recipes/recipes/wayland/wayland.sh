@@ -4,6 +4,7 @@ DESCRIPTION="Wayland client and server libraries and scanner"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="1.23.1"
 MEMA_AUTOINSTALL="1"
+MEMA_SUPPORTED_ARCHES="amd64"
 MEMA_INSTALL_DEPENDS="
   lib-libffi 3.4.4
   lib-expat 2.5.0

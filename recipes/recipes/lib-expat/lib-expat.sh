@@ -3,6 +3,7 @@ NAME="lib-expat"
 DESCRIPTION="Mema-managed Expat XML parser library"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="2.5.0"
+MEMA_SUPPORTED_ARCHES="amd64"
 deps="gcc, make, libc6-dev, autoconf, automake, libtool"
 
 set -e

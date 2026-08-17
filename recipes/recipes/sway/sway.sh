@@ -4,6 +4,7 @@ DESCRIPTION="Mema-managed i3-compatible Wayland compositor"
 SECTION="x11"
 MEMA_PACKAGE_VERSION="1.9"
 MEMA_AUTOINSTALL="1"
+MEMA_SUPPORTED_ARCHES="amd64"
 MEMA_INSTALL_DEPENDS="
   wlroots 0.17.2
   wayland 1.23.1

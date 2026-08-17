@@ -16,8 +16,14 @@ package="$tmp_dir/dist/mema_0.2_riscv64.deb"
     printf 'unexpected package architecture\n' >&2
     exit 1
 }
-[ ! -e "$tmp_dir/dist/mema-node-latest_1_riscv64.deb" ] || {
-    printf 'unsupported Node.js recipe was packaged for riscv64\n' >&2
+for recipe in bun deno go lib-display-info lib-expat lib-libffi lib-xml2 node php python ruby rust sway wayland wlroots; do
+    ! compgen -G "$tmp_dir/dist/mema-${recipe}_*_riscv64.deb" >/dev/null || {
+        printf 'unsupported recipe was packaged for riscv64: %s\n' "$recipe" >&2
+        exit 1
+    }
+done
+[ -e "$tmp_dir/dist/mema-wayland-protocols_1.43_riscv64.deb" ] || {
+    printf 'architecture-independent recipe was not packaged for riscv64\n' >&2
     exit 1
 }
 

@@ -3,6 +3,7 @@ NAME="lib-xml2"
 DESCRIPTION="Mema-managed XML parser library"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="2.9.14"
+MEMA_SUPPORTED_ARCHES="amd64"
 deps="gcc, make, libc6-dev"
 
 set -e

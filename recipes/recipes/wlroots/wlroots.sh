@@ -4,6 +4,7 @@ DESCRIPTION="Mema-managed wlroots compositor library"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="0.17.2"
 MEMA_AUTOINSTALL="1"
+MEMA_SUPPORTED_ARCHES="amd64"
 MEMA_INSTALL_DEPENDS="
   wayland 1.23.1
   wayland-protocols 1.43

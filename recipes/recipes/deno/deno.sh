@@ -3,6 +3,7 @@ NAME="deno"
 DESCRIPTION="Mema-managed Deno JavaScript runtime"
 SECTION="javascript"
 MEMA_PACKAGE_VERSION="2.9.5"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl, unzip"
 
 set -e

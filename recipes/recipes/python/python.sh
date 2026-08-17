@@ -3,6 +3,7 @@ NAME="python"
 DESCRIPTION="Mema-managed Python interpreter"
 SECTION="python"
 MEMA_PACKAGE_VERSION="3.14.7"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl"
 
 set -e

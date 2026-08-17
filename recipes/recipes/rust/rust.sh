@@ -3,6 +3,7 @@ NAME="rust"
 DESCRIPTION="Mema-managed Rust toolchain"
 SECTION="devel"
 MEMA_PACKAGE_VERSION="1.97.1"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl, xz-utils"
 
 set -e

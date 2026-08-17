@@ -5,6 +5,7 @@ DESCRIPTION="mema recipe, which installs the go recipe to use with mema for bett
 MAINTAINER="Coffee Maker Studio <mema@lupricht.net>"
 SECTION="devel"
 MEMA_PACKAGE_VERSION="1.26.5"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 
 set -e
 

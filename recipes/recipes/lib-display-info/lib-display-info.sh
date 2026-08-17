@@ -3,6 +3,7 @@ NAME="lib-display-info"
 DESCRIPTION="Mema-managed EDID and DisplayID parsing library"
 SECTION="libs"
 MEMA_PACKAGE_VERSION="0.2.0"
+MEMA_SUPPORTED_ARCHES="amd64"
 deps="gcc, libc6-dev, meson, ninja-build, pkg-config"
 
 set -e
