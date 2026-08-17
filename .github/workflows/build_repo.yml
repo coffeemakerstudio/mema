@@ -39,10 +39,19 @@ jobs:
 
       - name: Build Packages
         run: |
+          ./build-repo.sh
+          MEMA_ARCH=riscv64 DIST_DIR=dist-riscv64 DEB_DIR=debs-riscv64 ./build-repo.sh
+          cp dist-riscv64/mema_*_riscv64.deb dist/
+          (
+            cd dist
+            dpkg-scanpackages . /dev/null > Packages
+            gzip -kf Packages
+            apt-ftparchive release . > Release
+          )
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            MEMA_SIGN=1 ./build-repo.sh
-          else
-            ./build-repo.sh
+            gpg --batch --yes --dearmor -o dist/mema-keyring.gpg mema.gpg
+            gpg --batch --yes --local-user "${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}" --clearsign --digest-algo SHA256 -o dist/InRelease dist/Release
+            gpg --batch --yes --local-user "${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}" --armor --detach-sign --digest-algo SHA256 -o dist/Release.gpg dist/Release
           fi
 
       - name: Run helper tests
