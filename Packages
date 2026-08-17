@@ -1,432 +1,832 @@
 Package: mema-bun-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-bun, ca-certificates, curl, unzip
-Filename: ./mema-bun-latest_1_all.deb
-Size: 650
-MD5sum: 84bb9528336737bd59cc0394c89f439d
-SHA1: 9cec3d280a63a8600f1ca03abead236429552b77
-SHA256: e63d1c2b4c2c3f4364767efa54a42ffe9807a81b601ab3d7b5753bd3935de89b
-SHA512: 9d489ff46d37afbbe143a19ea7a997f8c4c6483d608f14937b151d951dfea0adfb936c31a1ce90d2dcb3862c71e6f99079d891f68769931592a8fff31e41f4d8
+Filename: ./mema-bun-latest_1_amd64.deb
+Size: 654
+MD5sum: 384968894985899c5b68138ea18e62c8
+SHA1: a8061b9f97fee3e97661feaee652f29acf3b9b25
+SHA256: 3da3c56ae13cc927ae85c9ca093423f85c9e193f00a56423cd64dd0954d68092
+SHA512: 3df667990758c4c3f9ec92f6268b657dc1a2e2e41229e12fe3fe1da869c60b45d3e4068f53a16072ca714d321f800b4122423d4085abfdde4030f870e47517ab
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Bun JavaScript runtime
+
+Package: mema-bun-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: javascript
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-bun, ca-certificates, curl, unzip
+Filename: ./mema-bun-latest_1_riscv64.deb
+Size: 654
+MD5sum: e32dfd7c7d947111a6a4807a1a05d287
+SHA1: 449b1050cdf66018e4eb9c6a73688b5d11fff56f
+SHA256: a75ae146153b78073cc1f299da6ab4942279c49ea88b3d888fe9fac397c8f30a
+SHA512: 2f77d369b10a0e4854ca35cdd8cb62a9d188064fca756eaa0aac654aa5484102881f323d60f5c006325c77e90e4d181abf78c520b3406461cb91333e9e765475
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Bun JavaScript runtime
 
 Package: mema-bun
-Architecture: all
+Architecture: amd64
 Version: 1.3.14
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, ca-certificates, curl, unzip
-Filename: ./mema-bun_1.3.14_all.deb
+Filename: ./mema-bun_1.3.14_amd64.deb
 Size: 1324
-MD5sum: 3026593abe7213233fe08fc71a05e3aa
-SHA1: c30acadd63ad532e03a5bf34166b627eec849afa
-SHA256: ac4e270b0a9bb808c448e1e43e058d83cc4856170599d354f7a2c366c95546c7
-SHA512: e98ed74b2da550c6584fadce0c72b6f0e3f6c59346c100720101221bceb71eb1c818f0eacc3d3f157240526d6466d8c64cb43adb798d8150f85f494f5048b8a7
+MD5sum: ce86af875e43896077f17956d222da27
+SHA1: 7181d78925a2bea55d8d2fd79636e55a2764f18a
+SHA256: d5bd3af13a63a3db39ba20150d23923df9494284dce64838fb32fa9896f11a7e
+SHA512: 5328039aa0e7b762d29048d5937408ef9563eb20d5bca128871a9076c1c4a0eab5166fb9dd3ba0e157e3debfc3b5d67b0a05be10a5c17984fd80f8930b2f1e83
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Bun JavaScript runtime
+
+Package: mema-bun
+Architecture: riscv64
+Version: 1.3.14
+Priority: optional
+Section: javascript
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, ca-certificates, curl, unzip
+Filename: ./mema-bun_1.3.14_riscv64.deb
+Size: 1328
+MD5sum: a0e3d5e6ffb1f53bcfb35e28e80c2cce
+SHA1: 7382cbd668ba9f450100218991513782ef78e85e
+SHA256: 8c80c086157b13688748369ef804255a003be85ceec2ece9ece8e1f86bf66f57
+SHA512: 4b5a488101d5ab956296c1a021d22c6712275658831234e1c8bb1a2e69f25d504cb66da59532675f2f0f494dfd4d25185fd8ca294bb511062e565b8bf4251d76
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Bun JavaScript runtime
 
 Package: mema-deno-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-deno, ca-certificates, curl, unzip
-Filename: ./mema-deno-latest_1_all.deb
-Size: 650
-MD5sum: a2381d4dc5ec94185b34e53a45dad357
-SHA1: 87b9e6eb78ed8b5c63f529353e8dc5402c7c4bb0
-SHA256: 0de91fc3bcb2c9daab6f99dfa008cbb1c9cb60af9ffda2e858d2a5074efe50ae
-SHA512: 4cb53231f94e698d75e179a3a1023a53f383d291bce98d8bf7ef0dd65d0fd8a3e5c74fef840ea67bcd7778fdb32682de47bc34b07f4f32ff71e6ba323da9fef4
+Filename: ./mema-deno-latest_1_amd64.deb
+Size: 654
+MD5sum: b34d3eed86f15201aac2829a80e59a91
+SHA1: 7526501d644a3a156e3f8bacc29debbfff2c90bc
+SHA256: 960214502642c41992b84f1029513b15d781aedee7d2e7a706c663d8cf52df4a
+SHA512: 5db8522af26917878da71dea7f9015aa740c6674f1af9844d981466cd053d1dbd3061ddef73f42d26bf5379db06a349e4eaf9c93ef442bea34affeed7f4b79f3
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Deno JavaScript runtime
+
+Package: mema-deno-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: javascript
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-deno, ca-certificates, curl, unzip
+Filename: ./mema-deno-latest_1_riscv64.deb
+Size: 658
+MD5sum: 804087e6b5ce62e5ae4fda7d065329a1
+SHA1: b8ca2daf0e02b5bc76d27a53999ff7f42e3d2d22
+SHA256: 8bb29dcd0cb764d60afd835fa897bc90dace3f1cd8e9a893d41b891949935faf
+SHA512: fef85b8f2532e6285f27b72653864c1d9bd5a0cd168d6a07d8026ca6285063c72d6a17ef651b65d83f569922ce0634d8a1e94f55f63ef0f6087688d2d89ba390
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Deno JavaScript runtime
 
 Package: mema-deno
-Architecture: all
+Architecture: amd64
 Version: 2.9.5
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, ca-certificates, curl, unzip
-Filename: ./mema-deno_2.9.5_all.deb
-Size: 1330
-MD5sum: 32a63f48c442ec0d1b68b0f6af00c080
-SHA1: 0065613073c06d22c0f6da839019c95075f240c3
-SHA256: c4c9ddf089691cb96a30197f91d5d2ef400c8d11f932b58e0058e08da3f30b39
-SHA512: 88e182db11b75d2150ab265b91421b2986804fe3180c2bffe8780cdcaeae3ae945cc1c4e9fcf689808e84b20ae2b5fac062748f67dfb80f6982a6702b670a0a0
+Filename: ./mema-deno_2.9.5_amd64.deb
+Size: 1332
+MD5sum: 2871c5bb1100fa258a159f58ff266768
+SHA1: 04b1258160e32f06ba3380cd82cdd9f8384b94a2
+SHA256: 89d3e0f664a1abc2d412cbd4d9a477c3949fa21b8b7e6ecded4791626c705911
+SHA512: 25c13f75f32d799142173e8b75e3a6edd838563caf131556ce7a6d832bdf50e238d60a25cd62a715fff6ad31d7ab62fe051edcab774aadecccedea865d1b3390
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Deno JavaScript runtime
+
+Package: mema-deno
+Architecture: riscv64
+Version: 2.9.5
+Priority: optional
+Section: javascript
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, ca-certificates, curl, unzip
+Filename: ./mema-deno_2.9.5_riscv64.deb
+Size: 1334
+MD5sum: 036f844dd3f4fe7b8bf4c6d0c2b4e8f7
+SHA1: c5206e2f3b01709d9f4acbbff5463db9cbac97d0
+SHA256: 6938486470466c4ecd9792ed712927a1f6368e060161814f86b929571219d409
+SHA512: 6c152fd803b3c20a5167dd72eb21ca4375cd3263835dc925beb5c4233a8c3b1f34f3a9bccc1f685211da168cd29c0fca9cb07a5dea5dc09e4f81082d040f3b3b
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Deno JavaScript runtime
 
 Package: mema-go-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-go
-Filename: ./mema-go-latest_1_all.deb
-Size: 668
-MD5sum: 1b0172cdcbe35e87f069a4b317dcb042
-SHA1: ab5ed4c2a8a4fbc069fb2195e6209c8f5c1116c6
-SHA256: 299d73dbcb093b3342321ca1019e9ddccea4975cfcc2b2f02d45cf7ace0f0166
-SHA512: 4b396d74c85698a081abb9054390643d55576eef7b69bc82305229a0ebd33f30fd9eb1b6df65182930ecdb1df2899ddec0492a180ee2c773a686eb00165117bd
+Filename: ./mema-go-latest_1_amd64.deb
+Size: 672
+MD5sum: d0a065839189324f0e015f608281d3f7
+SHA1: feca2e95fe2e04e7f600f650454860685f79a9f8
+SHA256: c4382aa2526d0e3b447a24305c259d92f49f82a0e8dc29362423a78e1c099bf8
+SHA512: 73e8b7da3a07199c36a3a6b17d7e9f5368ce6f3b655db8aa62d74e06058294d6109af02ad73466ec9ab0cb9407b5350cdc55c18ef539a21ccafb78a32275bb36
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
+
+Package: mema-go-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-go
+Filename: ./mema-go-latest_1_riscv64.deb
+Size: 672
+MD5sum: 42c7c8f8a5cf6ebd6ade7cdd322731bc
+SHA1: 3c5149acae9f9bbf630512a8576b8dd6aa55b443
+SHA256: 0dd0b24c909bab87b18a7e093cad3c13db1a386bd35ec72a4332fba696ae0bb6
+SHA512: 8e528e7b48d34b1b78236fc2dd07d59e32262e27d1fa3e234aec1936501380656a03c3ee0868997248a50a4c71129e0c68f2626a22f44bf8e62a174ba1cec2b6
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
 
 Package: mema-go
-Architecture: all
+Architecture: amd64
 Version: 1.26.5
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema
-Filename: ./mema-go_1.26.5_all.deb
-Size: 1900
-MD5sum: cc0f2ce7d41fa24a7d39364ed42f35b3
-SHA1: 4b52c86d4f9609550eccfaa888ac5210c22d86ce
-SHA256: 2d470814ee905b96b196e6445f346121f4e5b775d18a3ae0133b400ff843d68d
-SHA512: df3aa4a7a7b630dd0329c89adbfe163dfd83e8326d7ffca711a47aa3b4ecbdbe99fe9f6e77aa32e99afa5f03d676af26ae8560d75e964027ea96af6ebc02366f
+Filename: ./mema-go_1.26.5_amd64.deb
+Size: 1902
+MD5sum: 0cd86a0ba48bb89ef97962c4ea7914c4
+SHA1: 98870811283e5628b2c32075e567ac39e32b0b25
+SHA256: fd87c050cdc53f2ed26d74cb10ed56c7d452f2d0f8e7f605f0d0985b24a0b242
+SHA512: 426219f61a498a717b6994b1455fada55c6f117d8f6e56e588e1d569b40d55e72c1f3af8d274df4c302419fdc810a3857ef96edb1b447d52711201d56f83a842
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
+
+Package: mema-go
+Architecture: riscv64
+Version: 1.26.5
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema
+Filename: ./mema-go_1.26.5_riscv64.deb
+Size: 1904
+MD5sum: ac89ccfed35dc8dfa13c0f7600d10fc6
+SHA1: 6fc826c15e9e999affc82cb88840eff0722b9156
+SHA256: 86302295d81aa9d1cd91cb4165aa4b0db6e4690f77a5592dfc52e03c1ef5cabe
+SHA512: 9ae6081b26859a0b3f7418ef49b9dd623fee733f7b0927ebce4bde4f15209cb5e475a19a166e5343db2167a576b7f59cb1f0990d5408f8956a4c5cbb889c3760
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: mema recipe, which installs the go recipe to use with mema for better version control. this package is auto-generated.
 
 Package: mema-lib-display-info-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-lib-display-info, gcc, libc6-dev, meson, ninja-build, pkg-config
-Filename: ./mema-lib-display-info-latest_1_all.deb
-Size: 682
-MD5sum: cd393f633b84852d54406f007bd8bbcf
-SHA1: ea20fe3531f78f02b1c986a7dc60862d031d4a25
-SHA256: 14da7e75159c47a089b386eff07bd5b3a8bc75d8be67578b08513768d193024c
-SHA512: 0dad96e6539512110ae49cd300230d8a23da68a19d99bfd561e17688a41bd4a921c0d41474e97979f89bbefd854358bc16474519d80d5a2fb03d44812ea3de44
+Filename: ./mema-lib-display-info-latest_1_amd64.deb
+Size: 688
+MD5sum: 9f7585b142337139828b56a5204474f6
+SHA1: 99bb5c9913fe7516a4b4669ece891e814d891d99
+SHA256: 62f4d7db3e9a28be32baa4d621188d69dc8b50cd16b9fe87924902d44c432d7f
+SHA512: 945a8a8735e01b9854de43e8ff6d9f93fafcfc3af04af39c7ef8846ea929fcf98949a2b51e4ffcbffeca566f802b9e106105ce6c7bb495c22d93167e9f4b176a
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed EDID and DisplayID parsing library
+
+Package: mema-lib-display-info-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-lib-display-info, gcc, libc6-dev, meson, ninja-build, pkg-config
+Filename: ./mema-lib-display-info-latest_1_riscv64.deb
+Size: 690
+MD5sum: 060ea7e3428aa0861cd7495aa79552ee
+SHA1: a669891822250f4c060e476710bde2dcaf62e5c0
+SHA256: 955e926bf79ec400df51ec363fea8e85cb2b4fbf72ed3c29e70d13b82649b767
+SHA512: 01a81a89fa747cf020f8bf5b731d0fccbbdc1bbe846addadb1b3611a344ee34fdb0725112e8184997d6cc8d41298be240586d65e68389ceaca836c21be1c0e49
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed EDID and DisplayID parsing library
 
 Package: mema-lib-display-info
-Architecture: all
+Architecture: amd64
 Version: 0.2.0
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config
-Filename: ./mema-lib-display-info_0.2.0_all.deb
-Size: 1566
-MD5sum: 5148d91263c0a4a27bdbb243e3ec7741
-SHA1: daae147f83f48b82da234f48fd76f0bc84e83a77
-SHA256: f3da101350a3a261455e727915aaf5a0e56b9503983149b2d0153963bb321564
-SHA512: 11a7e8bec0a473b407f5ca2b285cda52f5a1a5bc4786ebcf7fe8dba49ebb353e374f164eac52d088b9859b65bac3c432233d5f0b308a30f86edbb6a9ec0b831d
+Filename: ./mema-lib-display-info_0.2.0_amd64.deb
+Size: 1572
+MD5sum: f7aeb023e3f7e635dcb3113936d9ca69
+SHA1: af6c3d0ce0a1709ce5e6891a677f5371c016bafc
+SHA256: a3c7765abe7db1695ce7fea3de99a5a3f80893e73a2c66c3be5593dee31e7a8d
+SHA512: 491cd295a0f5d8d1ae70be076fc2839bf21527bf71f6040320282e2c18f4a054957a17a6f711ee59e2180ae74a30014f6f311692fe06125d8b357929515d87e9
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed EDID and DisplayID parsing library
+
+Package: mema-lib-display-info
+Architecture: riscv64
+Version: 0.2.0
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config
+Filename: ./mema-lib-display-info_0.2.0_riscv64.deb
+Size: 1572
+MD5sum: 5418be0d0acc2574c357906839adf4b6
+SHA1: 96d68d0e1562e57ae8b480d6065c92dbd1ada48a
+SHA256: ee62926b1ec7e1b2783566181bf2472a675fa347357e38e0a63a51631d90c226
+SHA512: 091f4963944958924a814196e1ffe4232b94ff341573219407c0799bfc4e5cd9e5ebc9f444f0c0f8b0729b17fde969da3cc62a624193f14435eea6fc9c0495d4
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed EDID and DisplayID parsing library
 
 Package: mema-lib-expat-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-lib-expat, gcc, make, libc6-dev, autoconf, automake, libtool
-Filename: ./mema-lib-expat-latest_1_all.deb
-Size: 664
-MD5sum: 3a7f2ee1831cde6557f9029743aaf29a
-SHA1: 187ccd17e49227a64c522daa7b51c3e5df05ad96
-SHA256: b220f010e7187ed6dcab4f99ecbdb38aab7e8fa9a6e9e16ccdae9f9130dc65bf
-SHA512: b6563fe19414b359d69d51ae91c385de4cbd740347f6236b2e40627c01f5035f2b28db262fe56a9f3dbbc119136110153dde3597e6dd63af254f5d7cf95dc765
+Filename: ./mema-lib-expat-latest_1_amd64.deb
+Size: 670
+MD5sum: dc6b28838c80254bde18829db4f40c11
+SHA1: 4f21bc61c74707799cdfb0829a08c38febfba022
+SHA256: 4d7b158ca1dac1ba691e9ac382c94fa809ad6ba09c342ddf39489c3f7644c292
+SHA512: 915109b2c67d7b27d6f519391b414f538dae0c442c7a59d67bb56318bad8f1465b2d1da5ebd310e6bea480f5eca88e41bb40908a2eee81995630daaf9b66b6b7
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Expat XML parser library
+
+Package: mema-lib-expat-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-lib-expat, gcc, make, libc6-dev, autoconf, automake, libtool
+Filename: ./mema-lib-expat-latest_1_riscv64.deb
+Size: 674
+MD5sum: 86f77e11f53d58103b337c85f8f0f6cf
+SHA1: 3a223990f332d7657469034143d983f209a1754e
+SHA256: 9103d6df49a8360cc399e6b320ad67e592f44f58beacc37bb2ebc84424c47a43
+SHA512: ce48cfae40edd1915f13d6c06887e3422f6f4cbb6570c220d1467557f5612a8164b4e4b1361d31557f9258e41ab012ee90924a3a1cc06c356c4c5bb7d322c625
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Expat XML parser library
 
 Package: mema-lib-expat
-Architecture: all
+Architecture: amd64
 Version: 2.5.0
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, make, libc6-dev, autoconf, automake, libtool
-Filename: ./mema-lib-expat_2.5.0_all.deb
-Size: 1418
-MD5sum: 7d72fbeff1046a71f0756ce116fa6d30
-SHA1: 0805e3da5dd79277cb897273426b0356c9771e65
-SHA256: 66fba809c44ecd6159c6db922f5a519242997c12c21378313fa52cfa6149e527
-SHA512: e72c8cd9865a6fd98e8f25110aa79a324a2bd1067b47587f0df573551704a0cd0d31c8ee218c79a6038b1121b99b9a7f0110f740b3aff095303dd854596e68b5
+Filename: ./mema-lib-expat_2.5.0_amd64.deb
+Size: 1420
+MD5sum: 064fcf86aa48ec208dca0aab71f00e7c
+SHA1: a3bbfc4ce856515a276060e7b565abdb01905b65
+SHA256: 6486c2c5452c7e82a38408b5a8e6d57eed8dc3372ab4445e9fd69ee7d00dd8f3
+SHA512: fee2852d646e695a26c4c432b6e09f90fc71f7ae70dada2eea7fad876a9a153f750ade816e970cac3c521af3002f7d498a0a3923ba32aad0b329ac3fc66c5dac
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Expat XML parser library
+
+Package: mema-lib-expat
+Architecture: riscv64
+Version: 2.5.0
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, make, libc6-dev, autoconf, automake, libtool
+Filename: ./mema-lib-expat_2.5.0_riscv64.deb
+Size: 1426
+MD5sum: 803d0f5307cc84127d704e054d86c40c
+SHA1: 0592700024b4bdaf95a24eb95a852011265c62a5
+SHA256: 3470d1670372f24669a0e2e3843dfde3ca56db714ff0c1ac7435eb706e84bbd0
+SHA512: afb9ea7447aee3950cf4d16188827fdafac34a1d98e837b674d47551aacf60c9049717f585a499387896763a3f6e61cbaf4182e6eba23966cdb954e5badaf35d
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Expat XML parser library
 
 Package: mema-lib-libffi-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-lib-libffi, gcc, make, libc6-dev
-Filename: ./mema-lib-libffi-latest_1_all.deb
-Size: 648
-MD5sum: 5fdc58f4a7c68f91c41d096316e830cc
-SHA1: 76db1552f6c5077473c92c916c8b75ff1325bc17
-SHA256: d1e515552a403b139cdb2cfcb89944485e7331f2b2d46300489ef8d7a977fa07
-SHA512: 7f26b05c17d87ae483d5a049edcf3c4c002b19c5bb2a4d0901b68325d1e809e912f7e6f62411e99deb0fa617213763f0d012dad9ff819f7e13bffed2ba51ff66
+Filename: ./mema-lib-libffi-latest_1_amd64.deb
+Size: 650
+MD5sum: 512b19c97a14e1b51609de792dd1f946
+SHA1: 185189f24741e76502a42122cd6042a37a56af3c
+SHA256: a2492b5e41b15eb01063b88b7273c16e59a41d883432c5071eebc944b3bf2eba
+SHA512: ef82d76ad69249558176c8aa8823eba29ca4b9f5f3fb4a2fc42c9d65ee58eed0a3174b189ad5bccd17e17b570110421b4e4c5d6f17c3a1d1b4fefa6a3043eef6
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed libffi development library
+
+Package: mema-lib-libffi-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-lib-libffi, gcc, make, libc6-dev
+Filename: ./mema-lib-libffi-latest_1_riscv64.deb
+Size: 652
+MD5sum: c08c66bb97b4e8c4c5f31e2fb7c27bb8
+SHA1: fb9f3f0e5c1bf947dd95e63a7822de1a8f26f4f5
+SHA256: 9ad11b4b9fa2db107cf105ad20a0d4c8fc0eb9ef7dc206972a3f2ae57fd160dc
+SHA512: 1fac01c0cb4534df89ae94d5bd776f4bee1db40ead1d47808a2decc81439108a4d09162b06eddaf407dec22af5308cd4a01beaabb173b51892b35badf9bf4a4e
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed libffi development library
 
 Package: mema-lib-libffi
-Architecture: all
+Architecture: amd64
 Version: 3.4.4
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, make, libc6-dev
-Filename: ./mema-lib-libffi_3.4.4_all.deb
-Size: 1378
-MD5sum: c7c2add3d249ee166d741f4877a075d7
-SHA1: cac7c1b3e402fa177fa4429183278027d18421a3
-SHA256: fe80cdd3112c03412464102ad30d63f034153a39ef5d36f147a28e69522bd3ad
-SHA512: bdc5f21ac0a4ade7c2564639cf62ca0322260b34f247d90ae4e2c3dfba0e099a62c4f44e41f235af3bcdbd8985798cd1395de6db4cbd43ba58ff2abf7049da7b
+Filename: ./mema-lib-libffi_3.4.4_amd64.deb
+Size: 1382
+MD5sum: a6a65e439363df2c56c3ed2f9dddb76f
+SHA1: 5f861915df92d74d0bd454bd5cc4527244b701f0
+SHA256: 20e7aaa0d5f313bb2b5ee16343675e3e2afe72e7c1b5203c32958307821acedc
+SHA512: 9e37ee883f8914325192ade39e91d5aedd7e3fa453332d31ffe150f671e8a64ba475d659118e4fee74cb6b5a235e782b896ddac47d3ced1b2d3a3104dceb7607
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed libffi development library
+
+Package: mema-lib-libffi
+Architecture: riscv64
+Version: 3.4.4
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, make, libc6-dev
+Filename: ./mema-lib-libffi_3.4.4_riscv64.deb
+Size: 1386
+MD5sum: b24002af0fd125ffa1d7aa77c7efc629
+SHA1: c189768818e54206950095d0f7361b3398e3e962
+SHA256: 40a4a7bdc24a1c90a09eab0188e9e61b092b09a269fec1b3235b3022c98197c1
+SHA512: 898d270762224c07c523793701cc3ffdac4714cdf0d05f1a7332d2b04e6359b7762135f9ce32c7d9f135ce3850af951e6cff997c6197b7dd717b39d58b873d21
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed libffi development library
 
 Package: mema-lib-xml2-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-lib-xml2, gcc, make, libc6-dev
-Filename: ./mema-lib-xml2-latest_1_all.deb
-Size: 650
-MD5sum: 0b18a1eaa59cc79a7c83061cf583f1e1
-SHA1: f8643e777999d43daec087ae823817c86721117d
-SHA256: dae9d2e07c674895cb1bfd38e301650d8e6218b781e44783939a86bc69333fd9
-SHA512: b0cea6b5dcfa8986e94d6ac6453628c690c405f5404ae5e46c75dded35eb527b30348d5655bed97939246504b763a4d4dc9ec086bc417591eb54a7602d467836
+Filename: ./mema-lib-xml2-latest_1_amd64.deb
+Size: 654
+MD5sum: 13071ca9e5a8c83ad0a376cbce9aba48
+SHA1: 186caf1db21a79eaa52453de604abb83a39b0b86
+SHA256: 5de10c9fa0edef0c6ec547b3ff90e1577810985b189a578db4abbe8ddbe6457a
+SHA512: d1c13878553a05cbb6ebf37f18c7a94203ec5fdd1e1a3c2cc6fdae7b295af9ef750c76870f0ccb678b1498c32c9cfd66a77d90cd3c1085b83e0b7a14549b0351
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed XML parser library
+
+Package: mema-lib-xml2-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-lib-xml2, gcc, make, libc6-dev
+Filename: ./mema-lib-xml2-latest_1_riscv64.deb
+Size: 656
+MD5sum: a436237f15bda6e6dd10d114bd49389e
+SHA1: ffcb6aac9b85738ab2f35f2b5ba728cde533a769
+SHA256: cb1e6ed0e4100159fcd130a77ec4d037bec255267342c8523c5025ae2084f2b7
+SHA512: 8f0907b13bd29e41bbbb4d77d1665861360ca82d8e8ea644a716a4606c217b032e7f82139dd61dadab52d0beceff5fa26033038669ab59f0acf812dcb26b57bc
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed XML parser library
 
 Package: mema-lib-xml2
-Architecture: all
+Architecture: amd64
 Version: 2.9.14
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, make, libc6-dev
-Filename: ./mema-lib-xml2_2.9.14_all.deb
-Size: 1412
-MD5sum: 91d23ebba1cb989319bd0e503517b641
-SHA1: cbbc51fcc71ad552ef73075d1c9cd0c50a6ad4d3
-SHA256: a7e28e8c8cc290d9f63fe96ab50501a6d8ba978c1a41209769cf0c54c364f468
-SHA512: 6655ae2ca66249c8dd4b95efedc58f732423d93ed44f1dcaea16a33d05316ff20ccff74aecb198695b0d44edf1fcedda55ec1006fa560cf59cba9c4e9028abba
+Filename: ./mema-lib-xml2_2.9.14_amd64.deb
+Size: 1418
+MD5sum: 72df908b269f015f04eb4bf860801ec9
+SHA1: 4938a0f66f4733341d604cc6a860245f67f1d9c3
+SHA256: 52e5ba19fb3760413a33a8c68d3cfe9e0f828b813ed142faab6c59b2a4733d3d
+SHA512: 5158ffdd626368708216992bff87391881922a32c2b6f1f14c5492070071cf71f885f6528894d21111dc9160bda738ed03c9b4ac0ba1e8e2cb62e08b38262782
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed XML parser library
+
+Package: mema-lib-xml2
+Architecture: riscv64
+Version: 2.9.14
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, make, libc6-dev
+Filename: ./mema-lib-xml2_2.9.14_riscv64.deb
+Size: 1422
+MD5sum: b853a8a4ed17390582721624a9dd4772
+SHA1: 30512f67235a8a0800cdfadbe5758d1a30bed03d
+SHA256: 5a15619101e84f29ab3bf40b13a003613147c69e0ce7f9cc247a88b7d87f1b85
+SHA512: 16f09dada66d7bd92a85708298f17957bd62a34f04821dc299ed5eba40fc002af86e4a474c448d2c645cd9a29584fac407e8caba58b2a7832e513c5e5d44ee36
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed XML parser library
 
 Package: mema-node-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-node, ca-certificates, curl, xz-utils
-Filename: ./mema-node-latest_1_all.deb
-Size: 658
-MD5sum: 7d032e6df3a0c8cdd2b4b45aabacce35
-SHA1: e4251344c363a23e08406f2200bc10454e675fdd
-SHA256: 346fc0bee35a00feac7a8d511761df88470c7caf91ab5f4c3dc34d4344c9ad01
-SHA512: 7875d4bd7fad31d3f74f5c8836389071d7040955881a5988a04a127f053a3f43d7b4fdf132cf80313809c737650a04f17310d2739a2d463209d49a6a86572acd
+Filename: ./mema-node-latest_1_amd64.deb
+Size: 656
+MD5sum: 5bb569a14a9435ed15be8ec0721c245b
+SHA1: bf663c0ce9afb4ef56e35bd81d72d5d77ccf815c
+SHA256: 7050accf23b9866be3dd03b99744ddae9dd75cfd8b0888f1887c8b538ec9b2f1
+SHA512: 03def12d4ccb12488caf861b2d012fc153d3721d81f22ed7a21d6ad8e3763c941725da46219ebbc875ec7f7cd10a38db1a09c009a7e977b7f01a5e0452a68566
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Node.js runtime
 
 Package: mema-node
-Architecture: all
+Architecture: amd64
 Version: 24.19.0
 Priority: optional
 Section: javascript
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, ca-certificates, curl, xz-utils
-Filename: ./mema-node_24.19.0_all.deb
-Size: 1382
-MD5sum: e92e6d67d646a20ea98cac4c5b730d83
-SHA1: 67cb24e57c1db8a56c6ee9ae290d7ad93fb2aa8a
-SHA256: 0967e91912be1567842d57ecb9ab95754f9e168481c068a2f6832dd5a3c8546f
-SHA512: 813f64ba46ad21e56a55422d5eafab5ad2e55ec2bceabc3ec441f027ec598b3f40f6c9c619923dc3622f34a10fdf69ce7c1fbc1b3dc5d3962250d4d73a1a8b82
+Filename: ./mema-node_24.19.0_amd64.deb
+Size: 1406
+MD5sum: fcef590ab55fc39a2e731d6128e3c609
+SHA1: 320c95c9fe2772381ddc36b0a61df8a06a75288d
+SHA256: ed0e461f6c0821a4b93cfa08cffc4dd53a80c9d0bdefb10cbe5c8695fe32d93b
+SHA512: 6c75ef888863f9571ed5cf44b8c8367b5503c77b35cf5d956bdf13cde7b8d7b0effc882ef8621f1ab79ee30c5da239be9404b54876e69da9f78bdff09fefeb30
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Node.js runtime
 
 Package: mema-php
-Architecture: all
+Architecture: amd64
 Version: 8.5.9
 Priority: optional
 Section: web
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, build-essential, autoconf, bison, re2c, pkg-config, libssl-dev, zlib1g-dev
-Filename: ./mema-php_8.5.9_all.deb
-Size: 1572
-MD5sum: 2c6a9736b861404ed180f184c30ebe3f
-SHA1: 965d35e66fbfa48983a2fa0ee1209125573b356a
-SHA256: 84c0a4608a860cd7481c9975a64287183302c99c0137af57431ffa8b8d2dba07
-SHA512: 8bf7f164122d47157e6958714be78373315047f61b88561582f2216f099c23fddc66ebde1c344bc262275a7d08a0be16d112e533441c437c9804c9273d0a9348
+Filename: ./mema-php_8.5.9_amd64.deb
+Size: 1574
+MD5sum: 02b83e999e82713231e992d6e0c288fc
+SHA1: b7cfcf8c96f4799f090590c17cfb47cce5c29341
+SHA256: 93a09c3a6318423da327f1f8c76c384d35a8c5543c68fd1a0862c8cbc0e5ecca
+SHA512: 583fe34e6be9638c352f76cb48e54cc0f3149a2629c478b77ecf9cb0f470d13bc184143006036033addd6046983b38b7c486dba14bf18804c9181f083075bb1b
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed PHP CLI runtime
+
+Package: mema-php
+Architecture: riscv64
+Version: 8.5.9
+Priority: optional
+Section: web
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, build-essential, autoconf, bison, re2c, pkg-config, libssl-dev, zlib1g-dev
+Filename: ./mema-php_8.5.9_riscv64.deb
+Size: 1576
+MD5sum: 50f6c9d0266e0d0862d243a01cc93f59
+SHA1: b505c411577799f780a0efb3148f8f122c0fa8a7
+SHA256: 4d7e58ddeade07e6f7b141b546cb9bcd5b4dc0f9429fd4726d2599d812502f4c
+SHA512: 6e55ebc9908972685902758ddb73d86db69bb6ab34a67e80e486a418c6718102607b9698d34cafc06de35f2fa2b0c8a9d4471b90439a906f4583564c5b70df65
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed PHP CLI runtime
 
 Package: mema-python-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: python
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-python, ca-certificates, curl
-Filename: ./mema-python-latest_1_all.deb
+Filename: ./mema-python-latest_1_amd64.deb
 Size: 648
-MD5sum: 7e8322ff4c6c3d70e769c23f8e01df6c
-SHA1: dd7e9445bfa7641998435375ed60873de1563cbc
-SHA256: 289ad3acf2fa1552a157ab84f1fee3fb8c6a6a427690c0a0c811e8a2eb458877
-SHA512: 210e46386b377303921310209e35b08cafea49b8006099bccfa1efdca4db865d19719bffdc2cbd3dcfd0ea6a6c12b59b3907da4755a054d3a57ba32342ccfa02
+MD5sum: fe9acac32073388e35fb02d553655eb1
+SHA1: 9a4a3d065810d6fe9b0a59e612a5c73d7da44bbc
+SHA256: 7fafc20dcffc904f29ee4aeb49df82a8f08b20de8cea702b90f193ef5eeccc25
+SHA512: 821b4f1e8d25aac8051766e9a3813aca768a763d4609417b9842159057cd65873a1d3fa8ba3fce9f41f7e9163198cee4ea4b176cb95d2b878425f3038158662d
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Python interpreter
+
+Package: mema-python-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: python
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-python, ca-certificates, curl
+Filename: ./mema-python-latest_1_riscv64.deb
+Size: 646
+MD5sum: 3abac01dfd1a6d2a4e5995c63c2b53b7
+SHA1: d3ed2c6ae31032852df5dfe7cc7ef8359d330709
+SHA256: 5827a156ffbebc6d0dec42f012b7966a20c1b7ebf51d19a681f7c5f214fe345c
+SHA512: 4a286f731bab06adf6c27ce2c9f865608b73c5bf696a631ad8bf800e493c64a21291f9584508f507a7e3de4a3146bbe6c16d84d8f16b3e59bf43a03bf1f085d9
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Python interpreter
 
 Package: mema-python
-Architecture: all
+Architecture: amd64
 Version: 3.14.7
 Priority: optional
 Section: python
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, ca-certificates, curl
-Filename: ./mema-python_3.14.7_all.deb
+Filename: ./mema-python_3.14.7_amd64.deb
 Size: 1424
-MD5sum: af38cb8a3c7f2444dab39357b099280a
-SHA1: 6e464efb050b450689cd44d7dcbda9376f5e85dc
-SHA256: 269a3efac2b3830c116ef78f00cd9c0109b95ecabcb62ef0a33268341d061f22
-SHA512: ef17ed3c18101862f5f11e23a67c038a3a12cccbff4b31e544fad711454840a6b6bc1d19aeed61e4a9b49b91827df9a60c468d7701e9b7411f46ce678c3ed43e
+MD5sum: 6179bfbf0318a02c259eb6e10a7c2545
+SHA1: 166a839e89a5551320b1b76ae54024b582994728
+SHA256: 2986d3d7f963879207b85562342fe10375aaecff63173c1f3b2b9cf034540c3c
+SHA512: af522c21c907f0ae9e8075ccfca3e5ffb2daf96f7ef53b21774d53239e405b6e5355042473f4f8bad3e69913f2859dd909cb51e19fe986fc66f5c9282adbf2f8
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Python interpreter
+
+Package: mema-python
+Architecture: riscv64
+Version: 3.14.7
+Priority: optional
+Section: python
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, ca-certificates, curl
+Filename: ./mema-python_3.14.7_riscv64.deb
+Size: 1426
+MD5sum: 60aa54a3591da060242de294e30a6619
+SHA1: a6ba1648416794ad4b9c14ac79371055a65f61f4
+SHA256: cba031e710396b859fa1f7c5e65441ae927b6890df7c54772c983a8280e2ef98
+SHA512: ec14ca84c4f5a71aace099e9c47e8cf541509f5d20d78462fc9f118c9a95f0732650e2768a134a8101767c3278e260ceb6bf625ac0d7f906e5c01370221e9442
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Python interpreter
 
 Package: mema-ruby
-Architecture: all
+Architecture: amd64
 Version: 3.4.10
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, build-essential, autoconf, bison, libssl-dev, libyaml-dev, libreadline-dev, zlib1g-dev, libncurses-dev, libffi-dev
-Filename: ./mema-ruby_3.4.10_all.deb
-Size: 1568
-MD5sum: 948380c5cd192489b2389156f8da41c1
-SHA1: 06eaefe14a5a025ae109b3a21ccf51c9c51538a8
-SHA256: e389b9aa19047af0f500fedef9b70423a83cc905eda4366722c2d6ef7ab350dc
-SHA512: 058f32aef5d0e1f85575ff672b2b9e9141334c648fd1ef450f7b3aaec6e9bda4a42b65139be12e4b8500ec0929a57fa04e13a3ec6fd5848f997fac0a0acdaa5a
+Filename: ./mema-ruby_3.4.10_amd64.deb
+Size: 1578
+MD5sum: e715d5e4e15ff3f28f34aece04835773
+SHA1: 98c2fdddb74cd8cd5ae2f12d494e1b1ccfb33ff6
+SHA256: 86e3a18834d93011c2f49272c91f85a8b12499672fa5626f624a35d7c9467336
+SHA512: ca0298a55fde97bf0434b342fb57687fde70e142282066a45555c1c0343ac7c1714e8e523e335c8e67784b9863af0f6dfd7304f87d93f58dcb8e62fc7729ee31
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Ruby runtime
+
+Package: mema-ruby
+Architecture: riscv64
+Version: 3.4.10
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, build-essential, autoconf, bison, libssl-dev, libyaml-dev, libreadline-dev, zlib1g-dev, libncurses-dev, libffi-dev
+Filename: ./mema-ruby_3.4.10_riscv64.deb
+Size: 1578
+MD5sum: c48268bdcf882e176131dd21735af56f
+SHA1: 3c7616e20370348d59e1c5af37612ccd29f21159
+SHA256: 5512e4d25cee43662b4fc41be4f5abc3b659f897e8fecf71a48fc2f399f39506
+SHA512: d8a585b70c396e3b053720c2785010f5dafe0b75baa64b1cf39f6ee614734e135a545fa0a8d8713c48790bbb91cc6eca613464c7bb143e56a8df670be4fc77c3
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Ruby runtime
 
 Package: mema-rust-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-rust, ca-certificates, curl, xz-utils
-Filename: ./mema-rust-latest_1_all.deb
+Filename: ./mema-rust-latest_1_amd64.deb
+Size: 654
+MD5sum: acd3163b55040ffe485b71b77c375568
+SHA1: 5818ccffe523f8e98a196bf37ded3d8ab1451fed
+SHA256: 1aecf840226d782f40506bcc464ed8897c2d9130e3c0484cf330665a9ab67164
+SHA512: 6bf79db73dd95b8eaaa1ea157bc9d3f3a969c6155ae89e4794f76263fc5652c7703ffabf2a05ed9e97122c1d4debf24f72d558595a064ec55d7a2558111a1fb1
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Rust toolchain
+
+Package: mema-rust-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-rust, ca-certificates, curl, xz-utils
+Filename: ./mema-rust-latest_1_riscv64.deb
 Size: 656
-MD5sum: 57ad03417f35e1976dbff4944c040958
-SHA1: 8ca446447593031324becd329df4a4dce3e761fc
-SHA256: dea9739b897596c4652e7143fa4d569a205897db08d55ceb64575c62133f8b02
-SHA512: 1e6d18772de452098ba6eac0bf86b1557fcbfef8c80c49f4547f68c41770bd2eee8ab598260a3e72763f19f376eab0156a9868ec69c02dd568ff4a84c94606a2
+MD5sum: 678c5023044e3daf8ec8efdcb94a0827
+SHA1: 8e553ce9afb37ecbb16a7feb98490c8888add743
+SHA256: e983d008ed5f31772fef7bfa5f29fe05b17f5f0e14c45d7f2bc1e91f03d18c43
+SHA512: c0006936e4ff3f384fced597616d8267e606f3ab0e7b06e7e46c804ee233ef7dbb1b511ded9156d43e34b88071d19d6713a184fcc74bd35d623ba891eeab412d
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Rust toolchain
 
 Package: mema-rust
-Architecture: all
+Architecture: amd64
 Version: 1.97.1
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, ca-certificates, curl, xz-utils
-Filename: ./mema-rust_1.97.1_all.deb
+Filename: ./mema-rust_1.97.1_amd64.deb
 Size: 1400
-MD5sum: f03679fda98faa7fb70f4a0dca1b4a55
-SHA1: 0f735df4873ed1559dda0a5aca4bc01545b7ab94
-SHA256: ddf47aaa729c51aef5548adc31554bb498f17c377dc2973c2813dfbd4fb85412
-SHA512: 76084ec96bdc39d3ce060ecb959bb35724a2017400d07cf50c94c6172e55fccb6e3697b9f310c687da7877d729f95b62b66862699eeb17d855bd8cd9043538ef
+MD5sum: 0a120bf9d89632e3d5ef7dc8cb8dbd5d
+SHA1: 99a419b64ee1ed9b844cddbdf25303200a319bb6
+SHA256: 99fb8ceb8b935660b69d8869495863eac2a4800f6b5e319c41ec0ee230496dcb
+SHA512: dee09d6a5af471ebf4f73bb40ac6940feb78e32df47511f012165e17292ac9a9d9a49eb8052a8c3df7259992d4631ca659b0a888c2c4fb049fd14df77fd2f761
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed Rust toolchain
+
+Package: mema-rust
+Architecture: riscv64
+Version: 1.97.1
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, ca-certificates, curl, xz-utils
+Filename: ./mema-rust_1.97.1_riscv64.deb
+Size: 1402
+MD5sum: 57702e899a7bc5c04781ac79e5bd35b7
+SHA1: 53911a55a2efc670293094812bb55dfdf43e79ca
+SHA256: 2439a8f4cb82e4089a0a4af4b12ca49257ab125e9f9669f840ea78c204a4f4a2
+SHA512: 66fe5eba9212992f579eef1006ff5aa72d1e2b0e9e1e7148c43aa802b5afcd49545181d86cca548bf2ef15a0641bebae68a5c4d52e8b08bc7f5a3628b1d32921
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed Rust toolchain
 
 Package: mema-sway
-Architecture: all
+Architecture: amd64
 Version: 1.9
 Priority: optional
 Section: x11
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, libjson-c-dev, libpcre2-dev, libinput-dev, libdrm-dev, libudev-dev, libxkbcommon-dev, libpixman-1-dev, libevdev-dev, libcairo2-dev, libpango1.0-dev, libseat-dev, mema-wlroots (= 0.17.2), mema-wayland (= 1.23.1), mema-wayland-protocols (= 1.43)
-Filename: ./mema-sway_1.9_all.deb
-Size: 1786
-MD5sum: 0d6250a2db86a13aaccdbb1ecfaed247
-SHA1: 6d95f1bcd42ccdb237ac645006f2f3c999cee108
-SHA256: 9b51a59dd68796b7f34c0a16e70d34355c2468da1a29c8c625dd181acee41584
-SHA512: e8d9320ce1fbe1f7f161c86c9a2f79d3374adbb666625e95be5b7c3988686837a7f071396d9d4b91c57680bccc5c2124087f3d68babac58f805ab0f09913f294
+Filename: ./mema-sway_1.9_amd64.deb
+Size: 1788
+MD5sum: ac81b7b2cd7ae4277c8e88cd212e5269
+SHA1: 3ba0a8c7c87896eee8708dcb4c088f94563178d5
+SHA256: 13ab6d0b279869d69011b23dc9f4a0f582f71ac68e58521458031915acb2375b
+SHA512: a639bd0e5d5834cd571ae7412d3d31e064c2f7504724252f713f7a6fbb109e2b8834430c66d2e6cbdf96734d650fad0d61ce6ebc3988f02d0a7f6d689fee5c4a
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed i3-compatible Wayland compositor
+
+Package: mema-sway
+Architecture: riscv64
+Version: 1.9
+Priority: optional
+Section: x11
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, libjson-c-dev, libpcre2-dev, libinput-dev, libdrm-dev, libudev-dev, libxkbcommon-dev, libpixman-1-dev, libevdev-dev, libcairo2-dev, libpango1.0-dev, libseat-dev, mema-wlroots (= 0.17.2), mema-wayland (= 1.23.1), mema-wayland-protocols (= 1.43)
+Filename: ./mema-sway_1.9_riscv64.deb
+Size: 1788
+MD5sum: 5d3f3951a281ab6db949dbc3648fc0ab
+SHA1: a4f5d90fff668a0b6df3518ad0e13e21e6e8d094
+SHA256: 152fb83dd6b1974d8a51b4f59825babe0042746727272d93f559ae87dbb38b08
+SHA512: a77728a2d321a564390c519cb94d5d54454d6caa251a4904319fc3b246f98b77e2e84aa218f6d7426048263fca2c2b34540cac183596948eb2623b298f961fa9
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed i3-compatible Wayland compositor
 
 Package: mema-wayland-protocols-latest
-Architecture: all
+Architecture: amd64
 Version: 1
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, mema-wayland-protocols
-Filename: ./mema-wayland-protocols-latest_1_all.deb
+Filename: ./mema-wayland-protocols-latest_1_amd64.deb
 Size: 642
-MD5sum: 919f65fd05bf1d8f0aa8386572324e38
-SHA1: 4240179c2fbb2063d63a800054e0fc912d354539
-SHA256: ca08481c474512846c367fd337977ecafecaa9965484992fbfda4fd67eb1e362
-SHA512: 0ef6f7a21187d950c33d3c3bb8b0b597119c7c0171681eb249e4c9e5307d7dc147aa994cdb346e03f7c4df91e1282278d9826957cb4f3794d45175c71822e1e1
+MD5sum: 47dc6822b5476dc86ed3e9e41e364e4a
+SHA1: 64c9089f295a80777360151d0ef27d2173aecb48
+SHA256: 379d70adaa28a18602927f386a483ae183c64fc29f6b41d44a10c535835ed83f
+SHA512: 7fe83e49d630f02f205437cf34228960c1a3e3d4c9a5f2498744f569dba31102127c3322e6cb0d7bdc4d9bb5128ae5a3a29f7a77fdb5189d39b15df8aa10ecbb
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Wayland protocol extension definitions
+
+Package: mema-wayland-protocols-latest
+Architecture: riscv64
+Version: 1
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, mema-wayland-protocols
+Filename: ./mema-wayland-protocols-latest_1_riscv64.deb
+Size: 642
+MD5sum: b3318b4a8590e4d3face9512a4f01143
+SHA1: 74cf8ddab17673a6c4d26065e20355d2f1520c9c
+SHA256: cef3b09699aefbb5432ed81f5e94af63ba317823cfc18f30b07de77af5e78b5c
+SHA512: 6ebee6ef2b50a9e05e9ab132bd4a3c2ed3951391ccf36d6d2235180921e8abd60a28c932abcea756f448d4036c12ac41be0560d0c7f3af420c46e38f963f22e5
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Wayland protocol extension definitions
 
 Package: mema-wayland-protocols
-Architecture: all
+Architecture: amd64
 Version: 1.43
 Priority: optional
 Section: devel
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema
-Filename: ./mema-wayland-protocols_1.43_all.deb
-Size: 1360
-MD5sum: ed7a8631e2867f60af92a9e6716fa46c
-SHA1: 683cc787afc06fb5b957a20da64b93336e789597
-SHA256: 6927bdebb7694e3200d9bede622ba7f487e937a2840d4d04748f11b4b0836bb0
-SHA512: 1fe8186905acceede58b81d088a3c61245e940053a15e2e350b819a775a3b25082937b46c36fe5536e737f269c9397743c0a47a06050795d310fc23401a26fc1
+Filename: ./mema-wayland-protocols_1.43_amd64.deb
+Size: 1370
+MD5sum: af0c7728b387d54c7c98d01807dab3ea
+SHA1: 80839b73176b926295b22f1dda0fe8eb6748310e
+SHA256: 29fa092fa7f687b77d0d2007fe9a721c6c77baa5f5369ae3010e05d479289d37
+SHA512: c4bdcc863681ce698137dff06441d19227e6f20566b630d63fbcb23eb3a2336bef62e0e45b53485698cf6ede70338b95650efd8973f49bb429207674c913dda9
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Wayland protocol extension definitions
+
+Package: mema-wayland-protocols
+Architecture: riscv64
+Version: 1.43
+Priority: optional
+Section: devel
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema
+Filename: ./mema-wayland-protocols_1.43_riscv64.deb
+Size: 1372
+MD5sum: 81c33089a3ae974405e69f6d54206226
+SHA1: 87d30f9fdac5b064cc77ceefcd257a5290abad78
+SHA256: e5e0b2b70c7c0ed6519082cf362ee459b609dfd07c918265766daf80f94ced4f
+SHA512: dee739014be0e24795f4fd571d15647a02487f8aae589456b13326967a79114fc48871e65157fe95b2f3933f253a9da1db606720c9f9497614e8df4e01199c45
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Wayland protocol extension definitions
 
 Package: mema-wayland
-Architecture: all
+Architecture: amd64
 Version: 1.23.1
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, python3, mema-lib-libffi (= 3.4.4), mema-lib-expat (= 2.5.0), mema-lib-xml2 (= 2.9.14), mema-wayland-protocols (= 1.43)
-Filename: ./mema-wayland_1.23.1_all.deb
-Size: 1828
-MD5sum: bc87581501f927b884377acfdf65c56b
-SHA1: e7eb77fdbba57da91c19286b55c22836d9e9b79a
-SHA256: 8f40432c43e8a1a7709dff8b3e4999cb282a749bb1e10050d2c6260a972c132e
-SHA512: a50665a0592a497bd088ec46c0ab280ae17a88741b78d4ee1b5a13b4619fbb2c7f43a66d9668a6975fa94364e385aba210756edc9853219ef1a7b8153fe83d67
+Filename: ./mema-wayland_1.23.1_amd64.deb
+Size: 1832
+MD5sum: 827e20d34187972f3b2b5874b50c82c8
+SHA1: 80e55c8238712f3e7bc2d4cb656681d34614d311
+SHA256: aecbdc6cacf350db08680720b453c39cfa08f936eccc1b3bce6c4fe04c0aa686
+SHA512: 51009a51d511d5657d83e0c8ba249d973607008a9512e019f5c61c8a80c5d7c146a6bde2e2ce2e446098843efafd4348a09dcbac722c68cf43c6daaad06966f0
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Wayland client and server libraries and scanner
+
+Package: mema-wayland
+Architecture: riscv64
+Version: 1.23.1
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, python3, mema-lib-libffi (= 3.4.4), mema-lib-expat (= 2.5.0), mema-lib-xml2 (= 2.9.14), mema-wayland-protocols (= 1.43)
+Filename: ./mema-wayland_1.23.1_riscv64.deb
+Size: 1832
+MD5sum: 9f16f26fe3ad2defa25d383ea30cfd2c
+SHA1: d45371b393b788d4c919111f615db5318ab56d2c
+SHA256: e9a52551e8cd59508675ba36bda2b86e9aeb77756d037873eb34dd25c37b42dc
+SHA512: 6df523889145ac721bb39326cfd13e34f6813a2c4386412efc781ab3bced150b09a00373c6c76191acb7328bfb6a35af4efbdd4c2e7321562012f7efd51598f2
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Wayland client and server libraries and scanner
 
 Package: mema-wlroots
-Architecture: all
+Architecture: amd64
 Version: 0.17.2
 Priority: optional
 Section: libs
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, hwdata, libdrm-dev, libegl-dev, libgbm-dev, libgles2-mesa-dev, libinput-dev, libseat-dev, libudev-dev, libxkbcommon-dev, libpixman-1-dev, mema-wayland (= 1.23.1), mema-wayland-protocols (= 1.43), mema-lib-display-info (= 0.2.0)
-Filename: ./mema-wlroots_0.17.2_all.deb
-Size: 1926
-MD5sum: b442829d8ea0fecae72fa37d79ba5c2e
-SHA1: 883aea00fc2d03dac2a139abce3039cceec9093e
-SHA256: 69793308ceae4c6feef60a2d771658f74dca534c330782754a274d0bc0142508
-SHA512: 24a3759827b3f15df9bd7b4fcf8d32d274e6885e3de07f72ed717e9a9e19fb22a7aa10cbe7b49472051803059473e6d216aff6949ace4f4b4e0cf862f893cd17
+Filename: ./mema-wlroots_0.17.2_amd64.deb
+Size: 1930
+MD5sum: fc55ecffb48e0333968d5b56c92ab625
+SHA1: 3fd9dffa41c9833de58a187821d5f9adbd4a26b0
+SHA256: d38dba78a79376d41ff911c4b4e8a9ffdb92c7c3e7d0bb0e2c599c1cce4d8f10
+SHA512: 80a7e18a5c07c7b120bf8143f37d926a2b09e10907a854473377a8b4a435c089fac9869fa1bf08d1a71e68c3994fd2695e1855b2bd7685551cf4fbc4a82058e4
+Homepage: https://github.com/coffeemakerstudio/mema
+Description: Mema-managed wlroots compositor library
+
+Package: mema-wlroots
+Architecture: riscv64
+Version: 0.17.2
+Priority: optional
+Section: libs
+Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Depends: mema, gcc, libc6-dev, meson, ninja-build, pkg-config, hwdata, libdrm-dev, libegl-dev, libgbm-dev, libgles2-mesa-dev, libinput-dev, libseat-dev, libudev-dev, libxkbcommon-dev, libpixman-1-dev, mema-wayland (= 1.23.1), mema-wayland-protocols (= 1.43), mema-lib-display-info (= 0.2.0)
+Filename: ./mema-wlroots_0.17.2_riscv64.deb
+Size: 1930
+MD5sum: a97fd196e07b84f2071716dae800ca2c
+SHA1: 4899a3e154de29681037898e3176aa643bc07516
+SHA256: 6ca4d530ce46a11de966e41cecdc0df1cda50feb87411c16be98868d966d400e
+SHA512: f4342a80bc3685800075ca2b96893d1a374371e0f484988e3eb9316583ad9edb824ebdc1d2ac512ea6b0bb2638eb0a6bcb73bdd688afd3354111c8f7334e936a
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: Mema-managed wlroots compositor library
 
@@ -439,11 +839,11 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
 Filename: ./mema_0.2_amd64.deb
-Size: 1937512
-MD5sum: fdfc3ce453b1a63bf6c1b570f5254cff
-SHA1: 70b0afd8166efd87d0ee4befe8c00ca6ac9056fc
-SHA256: 72647cb2f6b015b08a3d340368b8a09cfa447587c94f4b60898a74f17e3714b2
-SHA512: cdd640e8f8790df5b4166cbc7b312ada9d722f01902ca57d5356df5937560b80d72ba0da0dd693b451d6ea26478422d0e6585cb1a707bd431a2b9a262ba975ac
+Size: 1937510
+MD5sum: 4dde2182793142d78398e10d1f752edc
+SHA1: 35a76b428856b5d37f95f155f596b2ed03a8971c
+SHA256: 44d75ae486517a44a5b8e43e87f88350bb05610456cb375684a27fa3066dd41e
+SHA512: 678a18addd83e774f690e2068b2c30c2c74aca35ad39d510e8e46e6302b0ad5ae75daee487eff30768fec1b13866e4764db5b3a3b55e959a1df799bd1e78dcd6
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
@@ -457,11 +857,11 @@ Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
 Filename: ./mema_0.2_riscv64.deb
-Size: 1833214
-MD5sum: 01680d34ada374779419a82be2042cf0
-SHA1: 1f04a55f67cd1edf667b11975f368158e4bd0193
-SHA256: ba024c64911f8bdff7e12af282cd272abd42a2db708e409b5a8300759d71b375
-SHA512: 427c065614f3e692f4853526140109f1a83f52aad659d1a5e0e1bf928f1906ed1047db858ef8f8dc0922219fe949845258ecca27066d715694471382901410fb
+Size: 1833200
+MD5sum: 137e8d891cdfc42f90676a8acdd55a5b
+SHA1: dd70f478b87d0ed816ac768eb5e514e4be8c7c18
+SHA256: b60e36bfbc7daf5c713292db43fa0825b4a481bb05d3afac64e782203594066a
+SHA512: 09c9eff80ddedf3bb8e0bb0340a9f78e2a9f9f8e5ddf861d492e4904a88381bca2b3814848bcadd73c8394932dedd5c04887c6cb336121c57e47215192f298a6
 Homepage: https://github.com/coffeemakerstudio/mema
 Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
