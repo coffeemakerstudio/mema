@@ -48,6 +48,9 @@ jobs:
       - name: Run helper tests
         run: ./tests/test_helpers.sh
 
+      - name: Test core package architecture metadata
+        run: ./tests/test_package_architecture.sh
+
       - name: Test recipe dependency packages
         run: ./tests/test_recipe_dependencies.sh
 

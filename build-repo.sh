@@ -2,8 +2,19 @@
 set -euo pipefail
 
 VERSION="${VERSION:-0.2}"
-DIST_DIR="dist"
-DEB_DIR="debs"
+DIST_DIR="${DIST_DIR:-dist}"
+DEB_DIR="${DEB_DIR:-debs}"
+MEMA_ARCH="${MEMA_ARCH:-$(dpkg-architecture -qDEB_HOST_ARCH)}"
+
+case "$MEMA_ARCH" in
+    amd64) GOARCH=amd64 ;;
+    arm64) GOARCH=arm64 ;;
+    riscv64) GOARCH=riscv64 ;;
+    *)
+        printf 'Unsupported Debian architecture for mema: %s\n' "$MEMA_ARCH" >&2
+        exit 1
+        ;;
+esac
 
 command -v dpkg-scanpackages >/dev/null || { printf 'dpkg-scanpackages is required.\n' >&2; exit 1; }
 command -v apt-ftparchive >/dev/null || { printf 'apt-ftparchive is required.\n' >&2; exit 1; }
@@ -24,7 +35,7 @@ mkdir -p "$DEB_DIR/DEBIAN" "$DEB_DIR/usr/local/bin" "$DEB_DIR/opt/mema/config.d"
 printf '%s\n' "--- Building mema $VERSION ---"
 (
     cd mema-go
-    go build -o ../core/mema .
+    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -o ../core/mema .
 )
 
 install -m 0755 core/mema "$DEB_DIR/usr/local/bin/mema"
@@ -39,7 +50,7 @@ install -D -m 0644 configs/mema-loader.sh "$DEB_DIR/etc/profile.d/mema.sh"
 cat > "$DEB_DIR/DEBIAN/control" <<EOF
 Package: mema
 Version: $VERSION
-Architecture: amd64
+Architecture: $MEMA_ARCH
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
 Recommends: unzip
@@ -49,7 +60,7 @@ Priority: optional
 Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
 EOF
-dpkg-deb --build "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_amd64.deb" >/dev/null
+dpkg-deb --build "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
 
 printf '%s\n' '--- Building recipe packages ---'
 (

@@ -105,7 +105,7 @@ require GPG.
 
 `tests/test.sh` is the release smoke test. It starts `debian:bookworm-slim`, configures only the locally built APT repository, installs `mema-go-latest`, and verifies both `mema list` and the activated `go` binary. `tests/test_outside.sh` builds a separate clean Debian image from `tests/Dockerfile` and validates package installation and tool execution during the image build. Both tests intentionally prove that the package works on a minimal Debian base; no Ubuntu container is needed.
 
-`mema-go/main.go` and `mema-go/go.mod` are the implementation of record. `mema-go/build.sh`, `mema-go/go_installer.sh`, `mema-go/deps/`, and `mema-go/site.html` are experimental or historical files and must not be treated as part of the package build or runtime contract. `core/mema_old` is historical reference only; do not use it as a source of current paths or APIs.
+`mema-go/main.go` and `mema-go/go.mod` are the implementation of record. `mema-go/build.sh`, `mema-go/go_installer.sh`, `mema-go/deps/`, and `mema-go/site.html` are experimental or historical files and must not be treated as part of the package build or runtime contract. `core/mema_old` is historical reference only; do not use it as a source of current paths or APIs. The package builder targets the host Debian architecture by default; `MEMA_ARCH` can select a supported `amd64`, `arm64`, or `riscv64` build target.
 
 ## Change Rules
 
