@@ -44,7 +44,7 @@ jobs:
           cp dist-riscv64/mema_*_riscv64.deb dist/
           (
             cd dist
-            dpkg-scanpackages . /dev/null > Packages
+            apt-ftparchive packages . > Packages
             gzip -kf Packages
             apt-ftparchive release . > Release
           )
