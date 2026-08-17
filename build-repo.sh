@@ -65,7 +65,7 @@ dpkg-deb --build "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/n
 printf '%s\n' '--- Building recipe packages ---'
 (
     cd recipes
-    ./build.sh
+    MEMA_ARCH="$MEMA_ARCH" ./build.sh
 )
 
 shopt -s nullglob

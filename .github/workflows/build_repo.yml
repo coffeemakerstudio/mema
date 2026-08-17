@@ -41,6 +41,7 @@ jobs:
         run: |
           ./build-repo.sh
           MEMA_ARCH=riscv64 DIST_DIR=dist-riscv64 DEB_DIR=debs-riscv64 ./build-repo.sh
+          cp dist-riscv64/mema-*.deb dist/
           cp dist-riscv64/mema_*_riscv64.deb dist/
           (
             cd dist

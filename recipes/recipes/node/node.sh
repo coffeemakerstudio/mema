@@ -3,6 +3,7 @@ NAME="node"
 DESCRIPTION="Mema-managed Node.js runtime"
 SECTION="javascript"
 MEMA_PACKAGE_VERSION="24.19.0"
+MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl, xz-utils"
 
 set -e

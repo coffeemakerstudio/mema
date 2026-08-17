@@ -16,5 +16,9 @@ package="$tmp_dir/dist/mema_0.2_riscv64.deb"
     printf 'unexpected package architecture\n' >&2
     exit 1
 }
+[ ! -e "$tmp_dir/dist/mema-node-latest_1_riscv64.deb" ] || {
+    printf 'unsupported Node.js recipe was packaged for riscv64\n' >&2
+    exit 1
+}
 
 printf '%s\n' '--- PASS: core package architecture metadata ---'

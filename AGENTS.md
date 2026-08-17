@@ -60,6 +60,7 @@ mema use                             # choose an installed version with fzf
 - Define `mema_install` and `mema_use`. `mema_install` must install then call `mema_use`; `mema_use` must only activate already-installed files by linking them.
 - Define `mema_get_versions` to print `VERSION ARCH SHA256 URL` records and `mema_resolve_version` to print the latest version for the active architecture. The CLI has a first-record fallback for simple recipes, but production recipes should resolve architecture explicitly.
 - Optionally define `MEMA_PACKAGE_VERSION` with the Debian package version matching the pinned upstream version.
+- Optionally define `MEMA_SUPPORTED_ARCHES` as the Debian architectures supported by the recipe; unsupported recipe packages are omitted from architecture-specific builds.
 - Optionally define `MEMA_AUTOINSTALL=1` and `MEMA_INSTALL_DEPENDS` as whitespace-separated recipe/version pairs. The package builder places those recipes through exact APT dependencies and calls `mema install <dependency> <version>` before installing the dependent recipe.
 - Install only beneath `MEMA_INSTALL_DIR`. Link selected executables into `MEMA_LINK_DIR`, using `MEMA_SUDO` where the destination requires privileges.
 - Download from the upstream HTTPS source and verify SHA-256 before extraction. Never make `SKIP_HASH` the default for a production recipe.

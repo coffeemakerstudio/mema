@@ -5,6 +5,7 @@ RECIPE_DIR="${RECIPE_DIR:-recipes}"
 MAINTAINER="Coffee Maker Studio <mema@lupricht.net>"
 HOMEPAGE="https://github.com/coffeemakerstudio/mema"
 OUT_DIR="${OUT_DIR:-dist}"
+PACKAGE_ARCH="${MEMA_ARCH:-all}"
 
 [ -d "$RECIPE_DIR" ] || { printf 'Error: directory %s not found.\n' "$RECIPE_DIR" >&2; exit 1; }
 rm -rf "/tmp/mema-recipe" "$OUT_DIR"
@@ -65,7 +66,7 @@ build_recipe_package() {
     cat > "$build_path/DEBIAN/control" <<EOF
 Package: $package_name
 Version: $package_version
-Architecture: all
+Architecture: $PACKAGE_ARCH
 Maintainer: $MAINTAINER
 Depends: $package_depends
 Homepage: $HOMEPAGE
@@ -73,15 +74,21 @@ Section: $SECTION
 Priority: optional
 Description: $DESCRIPTION
 EOF
-    build_deb "$build_path" "$OUT_DIR/${package_name}_${package_version}_all.deb"
+    build_deb "$build_path" "$OUT_DIR/${package_name}_${package_version}_${PACKAGE_ARCH}.deb"
     rm -rf "$build_path"
 }
 
 for recipe in "$RECIPE_DIR"/*/*.sh; do
     [ -f "$recipe" ] || continue
     printf '%s\n' "--- Processing recipe: $recipe ---"
-    unset NAME DESCRIPTION SECTION deps MEMA_PACKAGE_VERSION MEMA_AUTOINSTALL MEMA_DEPENDS MEMA_INSTALL_DEPENDS RECIPE_DEPS
+    unset NAME DESCRIPTION SECTION deps MEMA_PACKAGE_VERSION MEMA_AUTOINSTALL MEMA_DEPENDS MEMA_INSTALL_DEPENDS MEMA_SUPPORTED_ARCHES RECIPE_DEPS
     source "$recipe"
+    if [ -n "${MEMA_SUPPORTED_ARCHES:-}" ] && [ -n "${MEMA_ARCH:-}" ] &&
+        ! case " $MEMA_SUPPORTED_ARCHES " in *" $MEMA_ARCH "*) true ;; *) false ;; esac; then
+        printf 'Skipping %s on architecture %s\n' "$recipe" "$MEMA_ARCH"
+        unset -f mema_get_versions mema_resolve_version mema_install mema_use || true
+        continue
+    fi
     if ! declare -F mema_get_versions >/dev/null; then
         printf 'Warning: mema_get_versions() not found in %s\n' "$recipe" >&2
         unset -f mema_get_versions mema_resolve_version mema_install mema_use || true
@@ -98,7 +105,7 @@ for recipe in "$RECIPE_DIR"/*/*.sh; do
         cat > "$build_path/DEBIAN/control" <<EOF
 Package: mema-$NAME
 Version: $MEMA_PACKAGE_VERSION
-Architecture: all
+Architecture: $PACKAGE_ARCH
 Maintainer: $MAINTAINER
 Depends: mema${deps:+, $deps}${RECIPE_DEPS:+, $RECIPE_DEPS}
 Homepage: $HOMEPAGE
@@ -112,7 +119,7 @@ set -e
 $(recipe_install_commands)
 EOF
         chmod 755 "$build_path/DEBIAN/postinst"
-        build_deb "$build_path" "$OUT_DIR/mema-${NAME}_${MEMA_PACKAGE_VERSION}_all.deb"
+        build_deb "$build_path" "$OUT_DIR/mema-${NAME}_${MEMA_PACKAGE_VERSION}_${PACKAGE_ARCH}.deb"
         rm -rf "$build_path"
     else
         build_recipe_package "mema-$NAME" "$MEMA_PACKAGE_VERSION" "mema${deps:+, $deps}"
@@ -125,7 +132,7 @@ EOF
         cat > "$latest_path/DEBIAN/control" <<EOF
 Package: mema-$NAME-latest
 Version: 1
-Architecture: all
+Architecture: $PACKAGE_ARCH
 Maintainer: $MAINTAINER
 Depends: mema, mema-$NAME${deps:+, $deps}${legacy_deps:+, $legacy_deps}
 Homepage: $HOMEPAGE
@@ -140,8 +147,8 @@ $(for dependency in ${MEMA_DEPENDS:-}; do printf '/usr/local/bin/mema install %q
 /usr/local/bin/mema install $NAME latest
 EOF
         chmod 755 "$latest_path/DEBIAN/postinst"
-        rm -f "$OUT_DIR/mema-$NAME-latest_1_all.deb"
-        build_deb "$latest_path" "$OUT_DIR/mema-${NAME}-latest_1_all.deb"
+        rm -f "$OUT_DIR/mema-$NAME-latest_1_${PACKAGE_ARCH}.deb"
+        build_deb "$latest_path" "$OUT_DIR/mema-${NAME}-latest_1_${PACKAGE_ARCH}.deb"
         rm -rf "$latest_path"
     fi
     unset -f mema_get_versions mema_resolve_version mema_install mema_use || true
