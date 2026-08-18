@@ -105,7 +105,7 @@ The first graph is deliberately bounded:
 
 ```text
 mema-wayland 1.23.1
-|-- mema-lib-libffi 3.4.4
+|-- mema-lib-libffi 3.4.6
 |-- mema-lib-expat 2.5.0
 |-- mema-lib-xml2 2.9.14
 |-- mema-wayland-protocols 1.43

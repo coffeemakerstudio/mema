@@ -2,14 +2,14 @@
 NAME="lib-libffi"
 DESCRIPTION="Mema-managed libffi development library"
 SECTION="libs"
-MEMA_PACKAGE_VERSION="3.4.4"
+MEMA_PACKAGE_VERSION="3.4.6"
 MEMA_SUPPORTED_ARCHES="amd64"
 deps="gcc, make, libc6-dev"
 
 set -e
 
 mema_get_versions() {
-    printf '%s\n' '3.4.4 amd64 d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676 https://deb.debian.org/debian/pool/main/libf/libffi/libffi_3.4.4.orig.tar.gz'
+    printf '%s\n' '3.4.6 amd64 b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz'
 }
 
 mema_resolve_version() { printf '%s\n' "$MEMA_PACKAGE_VERSION"; }
@@ -18,12 +18,12 @@ mema_install() {
     local archive work source_dir
     local sudo_cmd="${MEMA_SUDO:-}"
     archive=$(mema_download \
-        'https://deb.debian.org/debian/pool/main/libf/libffi/libffi_3.4.4.orig.tar.gz' \
-        'libffi-3.4.4.tar.gz' \
-        'd66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676')
+        'https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz' \
+        'libffi-3.4.6.tar.gz' \
+        'b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e')
     work=$(mktemp -d)
     tar -xzf "$archive" -C "$work"
-    source_dir="$work/libffi-3.4.4"
+    source_dir="$work/libffi-3.4.6"
     (
         cd "$source_dir"
         ./configure --prefix="$MEMA_INSTALL_DIR" --disable-docs

@@ -6,7 +6,7 @@ MEMA_PACKAGE_VERSION="1.23.1"
 MEMA_AUTOINSTALL="1"
 MEMA_SUPPORTED_ARCHES="amd64"
 MEMA_INSTALL_DEPENDS="
-  lib-libffi 3.4.4
+  lib-libffi 3.4.6
   lib-expat 2.5.0
   lib-xml2 2.9.14
   wayland-protocols 1.43
