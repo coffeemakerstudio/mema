@@ -81,7 +81,7 @@ EOF
 for recipe in "$RECIPE_DIR"/*/*.sh; do
     [ -f "$recipe" ] || continue
     printf '%s\n' "--- Processing recipe: $recipe ---"
-    unset NAME DESCRIPTION SECTION deps MEMA_PACKAGE_VERSION MEMA_AUTOINSTALL MEMA_DEPENDS MEMA_INSTALL_DEPENDS MEMA_SUPPORTED_ARCHES RECIPE_DEPS
+    unset NAME DESCRIPTION SECTION deps MEMA_PACKAGE_VERSION MEMA_DEB_VERSION MEMA_AUTOINSTALL MEMA_DEPENDS MEMA_INSTALL_DEPENDS MEMA_SUPPORTED_ARCHES RECIPE_DEPS
     source "$recipe"
     if [ -n "${MEMA_SUPPORTED_ARCHES:-}" ] && [ -n "${MEMA_ARCH:-}" ] &&
         ! case " $MEMA_SUPPORTED_ARCHES " in *" $MEMA_ARCH "*) true ;; *) false ;; esac; then
@@ -96,7 +96,14 @@ for recipe in "$RECIPE_DIR"/*/*.sh; do
     fi
 
     MEMA_PACKAGE_VERSION="${MEMA_PACKAGE_VERSION:-0.1}"
+    MEMA_DEB_VERSION="${MEMA_DEB_VERSION:-$MEMA_PACKAGE_VERSION}"
     validate_package_version
+    case "$MEMA_DEB_VERSION" in
+        ''|*[!A-Za-z0-9.+:~-]*)
+            printf 'Invalid Debian package version %q for %s\n' "$MEMA_DEB_VERSION" "$NAME" >&2
+            return 1
+            ;;
+    esac
     if [ "${MEMA_AUTOINSTALL:-0}" = "1" ]; then
         RECIPE_DEPS=$(recipe_package_dependencies)
         build_path="/tmp/mema-recipe/mema-$NAME"
@@ -104,7 +111,7 @@ for recipe in "$RECIPE_DIR"/*/*.sh; do
         cp "$recipe" "$build_path/etc/mema/recipe/"
         cat > "$build_path/DEBIAN/control" <<EOF
 Package: mema-$NAME
-Version: $MEMA_PACKAGE_VERSION
+Version: $MEMA_DEB_VERSION
 Architecture: $PACKAGE_ARCH
 Maintainer: $MAINTAINER
 Depends: mema${deps:+, $deps}${RECIPE_DEPS:+, $RECIPE_DEPS}
@@ -119,10 +126,10 @@ set -e
 $(recipe_install_commands)
 EOF
         chmod 755 "$build_path/DEBIAN/postinst"
-        build_deb "$build_path" "$OUT_DIR/mema-${NAME}_${MEMA_PACKAGE_VERSION}_${PACKAGE_ARCH}.deb"
+        build_deb "$build_path" "$OUT_DIR/mema-${NAME}_${MEMA_DEB_VERSION}_${PACKAGE_ARCH}.deb"
         rm -rf "$build_path"
     else
-        build_recipe_package "mema-$NAME" "$MEMA_PACKAGE_VERSION" "mema${deps:+, $deps}"
+        build_recipe_package "mema-$NAME" "$MEMA_DEB_VERSION" "mema${deps:+, $deps}"
         legacy_deps=""
         for dependency in ${MEMA_DEPENDS:-}; do
             legacy_deps="${legacy_deps:+$legacy_deps, }mema-$dependency-latest"

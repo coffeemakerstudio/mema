@@ -3,6 +3,8 @@ NAME="bun"
 DESCRIPTION="Mema-managed Bun JavaScript runtime"
 SECTION="javascript"
 MEMA_PACKAGE_VERSION="1.3.14"
+MEMA_DEB_VERSION="1.3.14-1"
+MEMA_AUTOINSTALL="1"
 MEMA_SUPPORTED_ARCHES="amd64 arm64"
 deps="ca-certificates, curl, unzip"
 
@@ -27,6 +29,9 @@ mema_install() {
 }
 
 mema_use() {
+    local executable="$MEMA_INSTALL_DIR/bin/bun-linux-x64/bun"
+    [ "$(uname -m)" = aarch64 ] && executable="$MEMA_INSTALL_DIR/bin/bun-linux-aarch64/bun"
+    [ -x "$executable" ] || { printf 'Mema Error: Bun executable not found at %s.\n' "$executable" >&2; return 1; }
     $MEMA_SUDO mkdir -p "$MEMA_LINK_DIR"
-    $MEMA_SUDO ln -sfn "$MEMA_INSTALL_DIR/bin/bun" "$MEMA_LINK_DIR/bun"
+    $MEMA_SUDO ln -sfn "$executable" "$MEMA_LINK_DIR/bun"
 }
