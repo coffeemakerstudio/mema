@@ -118,7 +118,9 @@ This generates the package `mema-myprogram` at version `1.23.1`, adds
 first runs `mema install lib-mylib 1.0.0`, then installs the program. A program
 recipe can link against files activated by the library recipe through
 `$MEMA_LIB_DIR`. Legacy recipes may still use `MEMA_DEPENDS` for latest-package
-behavior.
+behavior. When repackaging an unchanged runtime version to correct recipe or
+package metadata, `MEMA_DEB_VERSION` may carry a Debian revision independently
+of `MEMA_PACKAGE_VERSION`.
 
 ## Troubleshooting
 
