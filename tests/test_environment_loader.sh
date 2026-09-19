@@ -7,8 +7,10 @@ trap 'rm -rf "$home_dir"' EXIT
 
 PATH=$(env -i HOME="$home_dir" PATH=/usr/bin:/bin bash -c \
     'source "$1"; printf "%s" "$PATH"' bash "$repo_dir/configs/mema-loader.sh")
-case ":$PATH:" in
-    *:"$home_dir/go/bin":*) ;;
-    *) printf 'GOPATH/bin is missing from fresh login PATH: %s\n' "$PATH" >&2; exit 1 ;;
-esac
-printf 'Mema login environment exposes Go user-tool path.\n'
+for expected in "$home_dir/go/bin" "$home_dir/.bun/bin"; do
+    case ":$PATH:" in
+        *:"$expected":*) ;;
+        *) printf 'user tool path is missing from fresh login PATH: %s\n' "$expected" >&2; exit 1 ;;
+    esac
+done
+printf 'Mema login environment exposes Go and Bun user-tool paths.\n'
