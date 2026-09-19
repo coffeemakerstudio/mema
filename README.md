@@ -125,7 +125,8 @@ of `MEMA_PACKAGE_VERSION`.
 ## Troubleshooting
 
 - If `mema` cannot be found after installation, start a new login shell and
-  ensure `/usr/local/bin` or `$HOME/.local/bin` is in `PATH`.
+  ensure `/usr/local/bin` or `$HOME/.local/bin` is in `PATH`. Mema's login
+  loader also exposes `$HOME/go/bin` for binaries installed with `go install`.
 - If interactive commands fail, install `fzf` and run `mema use` again.
 - If `mema` reports a missing recipe, install `mema-<tool>` or pass
   `--file <recipe>`.
