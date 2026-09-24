@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.2}"
+VERSION="${VERSION:-0.3}"
+SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 DIST_DIR="${DIST_DIR:-dist}"
 DEB_DIR="${DEB_DIR:-debs}"
 MEMA_ARCH="${MEMA_ARCH:-$(dpkg-architecture -qDEB_HOST_ARCH)}"
@@ -52,6 +53,7 @@ Package: mema
 Version: $VERSION
 Architecture: $MEMA_ARCH
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
+Mema-Source-Revision: $SOURCE_REVISION
 Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo, gpg
 Recommends: unzip
 Homepage: https://github.com/coffeemakerstudio/mema
