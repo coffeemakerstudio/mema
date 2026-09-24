@@ -66,7 +66,7 @@ Description: The Minimalist Meta-Manager
 EOF
 find "$DEB_DIR" -type d -exec chmod 755 {} +
 find "$DEB_DIR" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
-dpkg-deb --build --root-owner-group --compression=zstd "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
+dpkg-deb --build --root-owner-group -Zzstd "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
 
 printf '%s\n' '--- Building recipe packages ---'
 (
