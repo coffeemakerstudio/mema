@@ -7,7 +7,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 
 MEMA_ARCH=riscv64 DIST_DIR="$tmp_dir/dist" "$repo_dir/build-repo.sh" >/dev/null
 
-package="$tmp_dir/dist/mema_0.3.1_riscv64.deb"
+package="$tmp_dir/dist/mema_0.3.2_riscv64.deb"
 [ -f "$package" ] || {
     printf 'missing architecture-specific package: %s\n' "$package" >&2
     exit 1

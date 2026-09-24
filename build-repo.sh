@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.3.1}"
+VERSION="${VERSION:-0.3.2}"
 SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git show -s --format=%ct HEAD 2>/dev/null || date +%s)}"
 export SOURCE_DATE_EPOCH
@@ -64,6 +64,7 @@ Priority: optional
 Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
 EOF
+find "$DEB_DIR" -type d -exec chmod 755 {} +
 find "$DEB_DIR" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
 dpkg-deb --build --root-owner-group "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
 
