@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.3}"
+VERSION="${VERSION:-0.3.1}"
 SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
+SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git show -s --format=%ct HEAD 2>/dev/null || date +%s)}"
+export SOURCE_DATE_EPOCH
 DIST_DIR="${DIST_DIR:-dist}"
 DEB_DIR="${DEB_DIR:-debs}"
 MEMA_ARCH="${MEMA_ARCH:-$(dpkg-architecture -qDEB_HOST_ARCH)}"
@@ -36,7 +38,7 @@ mkdir -p "$DEB_DIR/DEBIAN" "$DEB_DIR/usr/local/bin" "$DEB_DIR/opt/mema/config.d"
 printf '%s\n' "--- Building mema $VERSION ---"
 (
     cd mema-go
-    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -o ../core/mema .
+    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -trimpath -buildvcs=false -o ../core/mema .
 )
 
 install -m 0755 core/mema "$DEB_DIR/usr/local/bin/mema"
@@ -62,7 +64,8 @@ Priority: optional
 Description: The Minimalist Meta-Manager
  Mema manages verified, isolated binary toolchains without polluting /usr/bin.
 EOF
-dpkg-deb --build "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
+find "$DEB_DIR" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
+dpkg-deb --build --root-owner-group "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
 
 printf '%s\n' '--- Building recipe packages ---'
 (
