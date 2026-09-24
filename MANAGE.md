@@ -44,13 +44,13 @@ category eligible for quarantine, and only when its policy is not `never`.
 ```text
 mema manage <service> status [--json]
 mema manage <service> verify [--json]
-mema manage <service> snapshot [--json]
+mema manage <service> snapshot [--dry-run] [--print] [--json]
 mema manage <service> snapshots [--json]
-mema manage <service> restore <snapshot> [--json]
+mema manage <service> restore <snapshot> [--dry-run] [--print] [--json]
 mema manage <service> update [<version>] [--json]
 mema manage <service> rollback [<version-or-snapshot>] [--json]
-mema manage <service> clean [--json]
-mema manage <service> clean full [--json]
+mema manage <service> clean [--dry-run] [--print] [--json]
+mema manage <service> clean full [--dry-run] [--print] [--json]
 mema manage <service> clean status [--json]
 mema manage <service> clean undo <operation-id> [--json]
 mema manage <service> logs [--json]
@@ -73,6 +73,22 @@ new object at the original destination.
 Each mutating operation takes a per-service lock and appends a JSON operation
 record under the management state directory. Incomplete operations remain
 visible in the journal. `--json` is available for automation and future adapters.
+
+Mutating operations support `--dry-run` and `--print`. A dry run resolves the
+same layered configuration as the real operation, reports manifest-owned
+resources, runtime target facts, backup settings, conflicts, and the ordered
+plan, but performs no service, filesystem, nginx, backend, quarantine, or
+operation-state mutation. JSON plans are suitable for SSH-based automation:
+
+```sh
+ssh production-host 'mema manage tparun snapshot --dry-run --print --json'
+```
+
+Resource paths and target names remain trusted manifest data. Secret values are
+never printed; declared secret locations and safe metadata such as ownership,
+permissions, and binary hashes may be shown to an authorized local operator.
+SSH is the management trust boundary; Mema does not add a private HTTP
+management endpoint or a second management API key.
 
 ## Typed configuration and backup policy
 
@@ -196,7 +212,7 @@ performed automatically.
 The foundation provides versioned encrypted snapshot metadata, GnuPG
 public-key encryption, local and FTP backend adapters, ciphertext verification,
 standalone inspect/verify/restore, manifest embedding, quarantine safety,
-journal, locking, and JSON output. Generic update/rollback providers and MCP
-are intentionally not implemented. Full daemon-based systemd/nginx
-qualification and TPA.run integration remain separate work. No TPA.run
-production manifest or production state is modified by this feature.
+journal, locking, dry-run planning, and JSON output. Generic update/rollback
+providers and MCP are intentionally not implemented. TPA.run private runtime
+inspection belongs behind authorized SSH and Mema Manage; public `/ready` and
+`/version` endpoints are not expanded with host topology or secrets.

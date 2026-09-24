@@ -160,12 +160,12 @@ type manageQuarantine struct {
 }
 
 func manageCommand(args []string, s scope) error {
-	overrides, args, err := parseManageInvocation(args)
+	overrides, args, options, err := parseManageInvocationOptions(args)
 	if err != nil {
 		return err
 	}
 	if len(args) < 2 {
-		return errors.New("usage: mema manage <service> <status|verify|snapshot|snapshots|restore|update|rollback|clean|config|logs>")
+		return errors.New("usage: mema manage <service> <status|verify|snapshot|snapshots|restore|update|rollback|clean|config|logs> [--dry-run] [--print]")
 	}
 	service := args[0]
 	if err := validatePathComponent(service, "service"); err != nil {
@@ -179,6 +179,34 @@ func manageCommand(args []string, s scope) error {
 		return err
 	}
 	op := args[1]
+	if options.print && !options.dryRun && (op == "snapshot" || op == "restore" || op == "clean") {
+		return errors.New("--print for mutating management operations requires --dry-run")
+	}
+	if options.dryRun {
+		switch op {
+		case "snapshot":
+			if len(args) != 2 {
+				return errors.New("snapshot dry-run does not accept additional arguments")
+			}
+			return managePlanSnapshot(m, manifestPath, service, s, overrides, options)
+		case "restore":
+			if len(args) != 3 {
+				return errors.New("usage: mema manage <service> restore <snapshot> --dry-run [--print]")
+			}
+			if err := validatePathComponent(args[2], "snapshot"); err != nil {
+				return err
+			}
+			return managePlanRestore(m, manifestPath, service, args[2], s, overrides, options)
+		case "clean":
+			full := len(args) > 2 && args[2] == "full"
+			if len(args) > 2 && (!full || len(args) != 3) {
+				return errors.New("usage: mema manage <service> clean [full] --dry-run [--print]")
+			}
+			return managePlanClean(m, manifestPath, service, s, full, overrides, options)
+		default:
+			return fmt.Errorf("--dry-run is not supported for %s", op)
+		}
+	}
 	if op == "clean" && len(args) > 2 {
 		switch args[2] {
 		case "full":

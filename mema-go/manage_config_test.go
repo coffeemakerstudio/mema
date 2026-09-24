@@ -112,4 +112,8 @@ func TestManageInvocationSetParsing(t *testing.T) {
 	if len(args) != 2 || overrides["BACKUP_BACKEND"] != "local" || overrides["BACKUP_FILE"] != "manual.mema" {
 		t.Fatalf("parsed overrides=%#v args=%#v", overrides, args)
 	}
+	overrides, args, options, err := parseManageInvocationOptions([]string{"service", "snapshot", "--dry-run", "--print", "--set=NAME=value"})
+	if err != nil || len(args) != 2 || overrides["NAME"] != "value" || !options.dryRun || !options.print {
+		t.Fatalf("parsed options=%#v overrides=%#v args=%#v err=%v", options, overrides, args, err)
+	}
 }

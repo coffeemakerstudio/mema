@@ -44,33 +44,51 @@ type manageResolvedConfig struct {
 
 var managePlaceholder = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}`)
 
+type manageInvocationOptions struct {
+	dryRun bool
+	print  bool
+}
+
 func parseManageInvocation(args []string) (map[string]string, []string, error) {
+	overrides, out, _, err := parseManageInvocationOptions(args)
+	return overrides, out, err
+}
+
+func parseManageInvocationOptions(args []string) (map[string]string, []string, manageInvocationOptions, error) {
 	overrides := map[string]string{}
 	out := make([]string, 0, len(args))
+	options := manageInvocationOptions{}
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
-		if arg == "--set" {
+		switch {
+		case arg == "--dry-run":
+			options.dryRun = true
+			continue
+		case arg == "--print":
+			options.print = true
+			continue
+		case arg == "--set":
 			if i+1 >= len(args) {
-				return nil, nil, errors.New("--set requires NAME=VALUE")
+				return nil, nil, options, errors.New("--set requires NAME=VALUE")
 			}
 			i++
 			arg = args[i]
-		} else if strings.HasPrefix(arg, "--set=") {
+		case strings.HasPrefix(arg, "--set="):
 			arg = strings.TrimPrefix(arg, "--set=")
-		} else {
+		default:
 			out = append(out, arg)
 			continue
 		}
 		name, value, ok := strings.Cut(arg, "=")
 		if !ok || !validVariableName(name) {
-			return nil, nil, fmt.Errorf("invalid variable override %q", arg)
+			return nil, nil, options, fmt.Errorf("invalid variable override %q", arg)
 		}
 		if _, exists := overrides[name]; exists {
-			return nil, nil, fmt.Errorf("duplicate variable override %q", name)
+			return nil, nil, options, fmt.Errorf("duplicate variable override %q", name)
 		}
 		overrides[name] = value
 	}
-	return overrides, out, nil
+	return overrides, out, options, nil
 }
 func validVariableName(name string) bool {
 	if name == "" {
