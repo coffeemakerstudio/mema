@@ -28,6 +28,7 @@ const (
 )
 
 var errSelectionCanceled = errors.New("selection canceled")
+var manageJSON bool
 
 type scope struct {
 	name        string
@@ -83,6 +84,8 @@ func printHelp(w io.Writer) {
 	fmt.Fprintln(w, "  use [tool] [version]         Select an installed version with fzf and activate it")
 	fmt.Fprintln(w, "  list                         List installed toolchains and active versions")
 	fmt.Fprintln(w, "  remove <tool> [version]      Remove an installed version")
+	fmt.Fprintln(w, "  manage <service> <operation> Manage an opted-in service manifest")
+	fmt.Fprintln(w, "  recover <inspect|verify|restore> <snapshot> Recover a self-describing snapshot")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Options:")
 	fmt.Fprintln(w, "  --local                      Use the per-user Mema paths")
@@ -100,12 +103,14 @@ func main() {
 	flags.SetOutput(io.Discard)
 	local := flags.Bool("local", false, "Use local scope for the operation")
 	recipeFile := flags.String("file", "", "Specify a recipe file to install from")
+	jsonOutput := flags.Bool("json", false, "Emit machine-readable JSON")
 	if err := flags.Parse(os.Args[2:]); err != nil {
 		fmt.Fprintf(os.Stderr, "mema: %v\n", err)
 		printHelp(os.Stderr)
 		os.Exit(2)
 	}
 
+	manageJSON = *jsonOutput
 	if err := run(command, flags.Args(), *local, *recipeFile); err != nil {
 		if errors.Is(err, errSelectionCanceled) {
 			return
@@ -116,6 +121,15 @@ func main() {
 }
 
 func run(command string, args []string, local bool, recipeFile string) error {
+	if command == "manage" || command == "recover" {
+		for i := 0; i < len(args); i++ {
+			if args[i] == "--json" {
+				manageJSON = true
+				args = append(args[:i], args[i+1:]...)
+				i--
+			}
+		}
+	}
 	s := operationScope(local)
 
 	switch command {
@@ -158,6 +172,10 @@ func run(command string, args []string, local bool, recipeFile string) error {
 			return errors.New("usage: mema remove <tool> [version]")
 		}
 		return remove(args, s)
+	case "manage":
+		return manageCommand(args, s)
+	case "recover":
+		return recoverCommand(args)
 	default:
 		return fmt.Errorf("unknown command %q; run 'mema help'", command)
 	}

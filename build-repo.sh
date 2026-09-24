@@ -52,7 +52,7 @@ Package: mema
 Version: $VERSION
 Architecture: $MEMA_ARCH
 Maintainer: Coffee Maker Studio <mema@lupricht.net>
-Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo
+Depends: curl, bash, git, jq, tar, xz-utils, ca-certificates, fzf, sudo, gpg
 Recommends: unzip
 Homepage: https://github.com/coffeemakerstudio/mema
 Section: admin

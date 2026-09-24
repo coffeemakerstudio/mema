@@ -33,7 +33,7 @@ sudo apt update && sudo apt install mema
 
 The installer requires `curl`, `gpg`, and root access. The core package
 declares its runtime dependencies, including `bash`, `curl`, `git`, `jq`,
-`tar`, `xz-utils`, `ca-certificates`, and `fzf`; `sudo` is used for global
+`tar`, `xz-utils`, `ca-certificates`, `fzf`, and `gpg`; `sudo` is used for global
 installation and activation when required. Individual recipes may add
 dependencies such as `unzip`.
 

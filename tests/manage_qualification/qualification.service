@@ -1,0 +1,7 @@
+[Unit]
+Description=Disposable qualification service
+[Service]
+ExecStart=/opt/mema-qualification/bin/service.py
+EnvironmentFile=/etc/mema-qualification/service.env
+[Install]
+WantedBy=multi-user.target

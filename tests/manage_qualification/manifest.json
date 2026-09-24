@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "service": "qualification",
+  "files": [
+    {"path":"/etc/systemd/system/mema-qualification.service","role":"systemd-unit"},
+    {"path":"/etc/mema-qualification/service.env","role":"env","secret":true},
+    {"path":"/opt/mema-qualification/bin/service.py","role":"binary"},
+    {"path":"/var/lib/mema-qualification/app.db","role":"database"},
+    {"path":"/var/lib/mema-qualification/current","role":"active-data","type":"symlink"}
+  ],
+  "config": [
+    {"path":"/etc/nginx/sites-available/mema-qualification","role":"nginx-config"},
+    {"path":"/etc/nginx/sites-enabled/mema-qualification","role":"nginx-enabled","type":"symlink"}
+  ],
+  "data":[{"path":"/var/lib/mema-qualification/data","role":"persistent-data"}],
+  "identity":[{"path":"/var/lib/mema-qualification/identity","secret":true,"critical":true}],
+  "targets": {
+    "runtime":{"type":"systemd","units":["mema-qualification.service"]},
+    "reverse_proxy":{"type":"nginx","configs":["/etc/nginx/sites-available/mema-qualification"]}
+  },
+  "health":{"ready":"http://127.0.0.1:18080/ready","version":"http://127.0.0.1:18080/version"},
+  "snapshot":{"recipient":"qualification@example.invalid"}
+}
