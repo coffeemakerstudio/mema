@@ -54,6 +54,9 @@ make_deb "$tmp/new/mema_0.4.1_amd64.deb" mema 0.4.1 amd64 new-amd64
 make_deb "$tmp/new/mema_0.4.1_riscv64.deb" mema 0.4.1 riscv64 new-riscv64
 make_deb "$tmp/new/tool_1.0_all.deb" tool 1.0 all tool-v1
 make_deb "$tmp/new/tool_2.0_all.deb" tool 2.0 all tool-v2
+make_deb "$tmp/new/dual_1.0_all.deb" dual 1.0 all dual-all
+make_deb "$tmp/new/dual_1.0_amd64.deb" dual 1.0 amd64 dual-native
+make_deb "$tmp/new/dual_1.0_riscv64.deb" dual 1.0 riscv64 dual-riscv
 
 MEMA_REPOSITORY_ARCHITECTURES='amd64 riscv64' "$repo_dir/scripts/build-repository-index.sh" "$tmp/old" >/dev/null
 FPR=$(gpg --batch --passphrase '' --quick-generate-key 'Mema retention test <retention@example.invalid>' ed25519 sign 0 2>/dev/null | awk '/fingerprint:/ {print $NF}')
@@ -71,6 +74,21 @@ assert_stanza "$tmp/merged/Packages" mema 0.4.1 amd64
 assert_stanza "$tmp/merged/Packages" mema 0.4.1 riscv64
 assert_stanza "$tmp/merged/Packages" tool 1.0 all
 assert_stanza "$tmp/merged/Packages" tool 2.0 all
+awk '
+    BEGIN { RS=""; FS="\n" }
+    {
+        delete f
+        for (i=1; i<=NF; i++) if (index($i, ": ") && substr($i,1,1)!=" ") {
+            split($i, pair, ": "); f[pair[1]]=pair[2]
+        }
+        if (f["Package"]=="dual" && f["Version"]=="1.0") {
+            if (f["Architecture"]=="amd64") amd=NR
+            if (f["Architecture"]=="riscv64") riscv=NR
+            if (f["Architecture"]=="all") generic=NR
+        }
+    }
+    END { exit(amd>0 && riscv>amd && generic>riscv ? 0 : 1) }
+' "$tmp/merged/Packages"
 grep -qx 'Architectures: amd64 riscv64' "$tmp/merged/Release"
 [ "$(grep -c '^Package: mema$' "$tmp/merged/Packages")" -eq 3 ]
 
@@ -109,4 +127,4 @@ if MEMA_REPOSITORY_KEY="$tmp/test-key.asc" \
 fi
 grep -q 'Packages SHA-256 mismatch' "$tmp/corrupt.log"
 
-printf '%s\n' '--- PASS: retained versions, architecture co-existence, checksum and conflict guards ---'
+printf '%s\n' '--- PASS: retained versions, native-architecture preference, checksum and conflict guards ---'

@@ -62,12 +62,13 @@ awk -v dir="$tmp/stanzas" '
             file=sprintf("%s/%06d", dir, ++count)
             print $0 > file
             close(file)
-            print f["Package"] "\t" f["Version"] "\t" f["Architecture"] "\t" f["Filename"] "\t" f["SHA256"] "\t" file
+            arch_rank=(f["Architecture"] == "amd64" ? 0 : f["Architecture"] == "arm64" ? 1 : f["Architecture"] == "riscv64" ? 2 : 3)
+            print f["Package"] "\t" f["Version"] "\t" arch_rank "\t" f["Architecture"] "\t" f["Filename"] "\t" f["SHA256"] "\t" file
         }
     }
-' "$tmp/Packages.raw" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2 -k3,3 -k4,4 > "$tmp/stanzas.sorted"
+' "$tmp/Packages.raw" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2 -k3,3n -k4,4 -k5,5 > "$tmp/stanzas.sorted"
 : > "$tmp/Packages"
-while IFS=$'\t' read -r _package _version _arch _filename _sha stanza; do
+while IFS=$'\t' read -r _package _version _arch_rank _arch _filename _sha stanza; do
     cat "$stanza" >> "$tmp/Packages"
     printf '\n\n' >> "$tmp/Packages"
 done < "$tmp/stanzas.sorted"
