@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -24,18 +25,30 @@ func recoverCommand(args []string) error {
 	if err != nil {
 		return err
 	}
-	if meta.SnapshotFormat != manageSnapshotFormatVersion {
+	if meta.SnapshotFormat != 1 && meta.SnapshotFormat != manageSnapshotFormatVersion {
 		return fmt.Errorf("unsupported snapshot format %d", meta.SnapshotFormat)
 	}
 	if args[0] == "inspect" {
 		return manageOutput(meta)
 	}
-	root, cleanup, err := manageEnsureSnapshotPayload(meta, dir)
+	if meta.SnapshotFormat == manageSnapshotFormatVersion {
+		if err := verifySnapshotDirectoryV2(dir, meta, false); err != nil {
+			return err
+		}
+	}
+	root, cleanup, err := recoverRootFromSnapshot(meta, dir)
 	if err != nil {
 		return err
 	}
 	defer cleanup()
 	if err := verifySnapshotPayload(meta, root); err != nil {
+		return err
+	}
+	manifest, err := readEmbeddedManifest(root, meta)
+	if err != nil {
+		return err
+	}
+	if err := validateSnapshotResources(meta, manifest); err != nil {
 		return err
 	}
 	if args[0] == "verify" {
@@ -45,28 +58,37 @@ func recoverCommand(args []string) error {
 }
 func readSnapshotMeta(dir string) (manageSnapshotMeta, error) {
 	var meta manageSnapshotMeta
-	b, err := os.ReadFile(filepath.Join(dir, "manifest.json"))
+	path := filepath.Join(dir, "manifest.json")
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return meta, fmt.Errorf("read snapshot metadata: %w", err)
 	}
 	if err := json.Unmarshal(b, &meta); err != nil {
 		return meta, fmt.Errorf("parse snapshot metadata: %w", err)
 	}
+	digestPath := filepath.Join(dir, "manifest.sha256")
+	digestBytes, digestErr := os.ReadFile(digestPath)
+	if meta.SnapshotFormat == manageSnapshotFormatVersion && digestErr != nil {
+		return meta, errors.New("snapshot manifest integrity sidecar is missing")
+	}
+	if digestErr == nil {
+		fields := strings.Fields(string(digestBytes))
+		if len(fields) != 2 || fields[1] != "manifest.json" || len(fields[0]) != 64 {
+			return meta, errors.New("snapshot manifest integrity sidecar is invalid")
+		}
+		actual := snapshotSHA256(b)
+		if actual != fields[0] {
+			return meta, errors.New("snapshot manifest checksum mismatch")
+		}
+	} else if !os.IsNotExist(digestErr) {
+		return meta, fmt.Errorf("read snapshot manifest integrity sidecar: %w", digestErr)
+	}
 	return meta, nil
 }
 func recoverRestore(meta manageSnapshotMeta, root string) error {
-	manifestBytes, err := os.ReadFile(filepath.Join(filepath.Dir(root), "service-manifest.json"))
+	manifest, err := readEmbeddedManifest(root, meta)
 	if err != nil {
-		// Encrypted payloads are extracted beside filesystem/. Plain snapshots
-		// keep the embedded manifest beside the snapshot directory.
-		return errors.New("snapshot does not contain an embedded service manifest")
-	}
-	var manifest manageManifest
-	if err := json.Unmarshal(manifestBytes, &manifest); err != nil {
 		return err
-	}
-	if manifest.Service != meta.Service || manifest.Version != manageManifestVersion {
-		return errors.New("embedded service manifest is incompatible")
 	}
 	if err := validateManageManifest(manifest); err != nil {
 		return err
@@ -74,15 +96,7 @@ func recoverRestore(meta manageSnapshotMeta, root string) error {
 	if err := validateSnapshotResources(meta, manifest); err != nil {
 		return err
 	}
-	if err := manageApplyTargets(manifest, "stop"); err != nil {
-		return err
-	}
-	for _, resource := range meta.Resources {
-		if err := manageRestoreOne(filepath.Join(root, filepath.FromSlash(resource.SnapshotPath)), resource.Path, resource); err != nil {
-			return err
-		}
-	}
-	if err := manageApplyTargets(manifest, "activate"); err != nil {
+	if err := manageApplyRestoreTransaction(meta, root, manifest); err != nil {
 		return err
 	}
 	return manageOutput(map[string]any{"snapshot": meta.ID, "service": meta.Service, "status": "restored", "completed_at": time.Now().UTC().Format(time.RFC3339Nano)})

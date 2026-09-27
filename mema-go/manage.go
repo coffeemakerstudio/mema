@@ -27,18 +27,23 @@ import (
 const manageManifestVersion = 1
 
 type manageResource struct {
-	Path     string `json:"path"`
-	Role     string `json:"role,omitempty"`
-	Type     string `json:"type,omitempty"`
-	Secret   bool   `json:"secret,omitempty"`
-	Critical bool   `json:"critical,omitempty"`
-	Clean    string `json:"clean,omitempty"` // never, quarantine, temporary, managed-history
+	Path     string   `json:"path"`
+	Role     string   `json:"role,omitempty"`
+	Type     string   `json:"type,omitempty"`
+	Secret   bool     `json:"secret,omitempty"`
+	Critical bool     `json:"critical,omitempty"`
+	Clean    string   `json:"clean,omitempty"` // never, quarantine, temporary, managed-history
+	Exclude  []string `json:"exclude,omitempty"`
 }
 
 type manageTarget struct {
 	Type    string   `json:"type"`
+	Scope   string   `json:"scope,omitempty"`
 	Units   []string `json:"units,omitempty"`
 	Configs []string `json:"configs,omitempty"`
+	Binary  string   `json:"binary,omitempty"`
+	Config  string   `json:"config,omitempty"`
+	Prefix  string   `json:"prefix,omitempty"`
 }
 
 type manageHealth struct {
@@ -91,44 +96,59 @@ type manageManifest struct {
 	Clean     manageCleanPolicy         `json:"clean,omitempty"`
 }
 
-const manageSnapshotFormatVersion = 1
+const manageSnapshotFormatVersion = 2
 const manageEngineVersion = "0.2"
 
 type manageSnapshotMeta struct {
-	SnapshotFormat      int              `json:"snapshot_format"`
-	ID                  string           `json:"id"`
-	ManifestVersion     int              `json:"manifest_version"`
-	MemaVersion         string           `json:"mema_version"`
-	Service             string           `json:"service"`
-	CreatedAt           string           `json:"created_at"`
-	Host                string           `json:"source_host"`
-	Consistency         string           `json:"consistency"`
-	Complete            bool             `json:"complete"`
-	State               string           `json:"state"`
-	Backend             string           `json:"backend,omitempty"`
-	BackupFile          string           `json:"backup_file,omitempty"`
-	Encryption          string           `json:"encryption,omitempty"`
-	EncryptionRecipient string           `json:"encryption_recipient,omitempty"`
-	Compression         string           `json:"compression,omitempty"`
-	Ciphertext          string           `json:"ciphertext,omitempty"`
-	CiphertextSHA256    string           `json:"ciphertext_sha256,omitempty"`
-	Size                int64            `json:"size,omitempty"`
-	ApplicationRevision string           `json:"application_revision,omitempty"`
-	ApplicationVersion  string           `json:"application_version,omitempty"`
-	Schema              string           `json:"schema,omitempty"`
-	ServiceManifest     string           `json:"service_manifest,omitempty"`
-	Resources           []manageCaptured `json:"resources"`
+	SnapshotFormat        int              `json:"snapshot_format"`
+	ID                    string           `json:"id"`
+	ManifestVersion       int              `json:"manifest_version"`
+	MemaVersion           string           `json:"mema_version"`
+	Service               string           `json:"service"`
+	Operation             string           `json:"operation,omitempty"`
+	CreatedAt             string           `json:"created_at"`
+	Host                  string           `json:"source_host"`
+	Consistency           string           `json:"consistency"`
+	Complete              bool             `json:"complete"`
+	State                 string           `json:"state"`
+	Backend               string           `json:"backend,omitempty"`
+	BackendType           string           `json:"backend_type,omitempty"`
+	BackupFormat          string           `json:"backup_format,omitempty"`
+	BackupFile            string           `json:"backup_file,omitempty"`
+	Encryption            string           `json:"encryption,omitempty"`
+	EncryptionRecipient   string           `json:"encryption_recipient,omitempty"`
+	Compression           string           `json:"compression,omitempty"`
+	Ciphertext            string           `json:"ciphertext,omitempty"`
+	CiphertextSHA256      string           `json:"ciphertext_sha256,omitempty"`
+	Size                  int64            `json:"size,omitempty"`
+	ApplicationRevision   string           `json:"application_revision,omitempty"`
+	ApplicationVersion    string           `json:"application_version,omitempty"`
+	Schema                string           `json:"schema,omitempty"`
+	ServiceManifest       string           `json:"service_manifest,omitempty"`
+	Resources             []manageCaptured `json:"resources"`
+	Excluded              []manageExcluded `json:"excluded,omitempty"`
+	PayloadFile           string           `json:"payload_file,omitempty"`
+	PayloadSHA256         string           `json:"payload_sha256,omitempty"`
+	ServiceManifestSHA256 string           `json:"service_manifest_sha256,omitempty"`
+	ManifestSHA256        string           `json:"-"`
+}
+
+type manageExcluded struct {
+	Path   string `json:"path"`
+	Reason string `json:"reason"`
 }
 
 type manageCaptured struct {
-	Path         string `json:"path"`
-	SnapshotPath string `json:"snapshot_path"`
-	Kind         string `json:"kind"`
-	Mode         uint32 `json:"mode"`
-	UID          int    `json:"uid,omitempty"`
-	GID          int    `json:"gid,omitempty"`
-	Link         string `json:"link,omitempty"`
-	SHA256       string `json:"sha256,omitempty"`
+	Path         string           `json:"path"`
+	SnapshotPath string           `json:"snapshot_path"`
+	Kind         string           `json:"kind"`
+	Mode         uint32           `json:"mode"`
+	UID          int              `json:"uid,omitempty"`
+	GID          int              `json:"gid,omitempty"`
+	Link         string           `json:"link,omitempty"`
+	SHA256       string           `json:"sha256,omitempty"`
+	Size         int64            `json:"size,omitempty"`
+	Entries      []manageCaptured `json:"entries,omitempty"`
 }
 
 type manageOperation struct {
@@ -165,7 +185,7 @@ func manageCommand(args []string, s scope) error {
 		return err
 	}
 	if len(args) < 2 {
-		return errors.New("usage: mema manage <service> <status|verify|snapshot|snapshots|restore|update|rollback|clean|config|logs> [--dry-run] [--print]")
+		return errors.New("usage: mema manage <service> <status|verify|snapshot|snapshots|backup|backups|restore|update|rollback|clean|config|logs> [--dry-run] [--print]")
 	}
 	service := args[0]
 	if err := validatePathComponent(service, "service"); err != nil {
@@ -179,14 +199,14 @@ func manageCommand(args []string, s scope) error {
 		return err
 	}
 	op := args[1]
-	if options.print && !options.dryRun && (op == "snapshot" || op == "restore" || op == "clean") {
+	if options.print && !options.dryRun && (op == "snapshot" || op == "backup" || op == "restore" || op == "clean") {
 		return errors.New("--print for mutating management operations requires --dry-run")
 	}
 	if options.dryRun {
 		switch op {
-		case "snapshot":
+		case "snapshot", "backup":
 			if len(args) != 2 {
-				return errors.New("snapshot dry-run does not accept additional arguments")
+				return fmt.Errorf("%s dry-run does not accept additional arguments", op)
 			}
 			return managePlanSnapshot(m, manifestPath, service, s, overrides, options)
 		case "restore":
@@ -226,11 +246,24 @@ func manageCommand(args []string, s scope) error {
 	case "status":
 		return manageStatus(m, manifestPath, service, s)
 	case "verify":
-		return manageVerify(m, service)
+		if len(args) == 2 {
+			return manageVerify(m, service)
+		}
+		if len(args) == 3 {
+			if err := validatePathComponent(args[2], "snapshot"); err != nil {
+				return err
+			}
+			return manageVerifySnapshot(service, args[2], s)
+		}
+		return errors.New("usage: mema manage <service> verify [snapshot-id]")
 	case "snapshot":
 		return manageSnapshotWithOverrides(m, manifestPath, service, s, overrides)
+	case "backup":
+		return manageBackupWithOverrides(m, manifestPath, service, s, overrides)
 	case "snapshots":
 		return manageSnapshots(service, s)
+	case "backups":
+		return manageBackups(service, s)
 	case "restore":
 		if len(args) != 3 {
 			return errors.New("usage: mema manage <service> restore <snapshot>")
@@ -308,14 +341,37 @@ func validateManageManifest(m manageManifest) error {
 			return err
 		}
 	}
-	for _, t := range m.Targets {
-		for _, unit := range t.Units {
+	for name, target := range m.Targets {
+		if target.Type != "systemd" && target.Type != "nginx" {
+			return fmt.Errorf("target %q has unsupported type %q", name, target.Type)
+		}
+		if target.Scope != "" && target.Scope != "system" && target.Scope != "user" {
+			return fmt.Errorf("target %q has invalid systemd scope %q", name, target.Scope)
+		}
+		for _, unit := range target.Units {
 			if unit == "" || strings.ContainsAny(unit, "/\\ ") {
 				return fmt.Errorf("invalid systemd unit %q", unit)
 			}
 		}
-		for _, p := range t.Configs {
+		for _, p := range target.Configs {
 			if err := validateManagePath(p); err != nil {
+				return err
+			}
+		}
+		if target.Type == "systemd" && len(target.Units) == 0 {
+			return fmt.Errorf("systemd target %q must declare at least one unit", name)
+		}
+		if target.Type == "nginx" && (target.Binary != "" || target.Config != "" || target.Prefix != "" || target.Scope == "user") {
+			if len(target.Units) == 0 || target.Binary == "" || target.Config == "" || target.Prefix == "" {
+				return fmt.Errorf("isolated nginx target %q must declare its binary, config, prefix, and systemd unit", name)
+			}
+			if err := validateManagePath(target.Binary); err != nil {
+				return err
+			}
+			if err := validateManagePath(target.Config); err != nil {
+				return err
+			}
+			if err := validateManagePath(target.Prefix); err != nil {
 				return err
 			}
 		}
@@ -422,7 +478,7 @@ func manageRecord(op manageOperation, s scope) {
 }
 
 func manageStatus(m manageManifest, manifestPath, service string, s scope) error {
-	result := map[string]any{"service": service, "manifest": manifestPath, "manifest_version": m.Version, "resources": len(manageResources(m)), "targets": m.Targets}
+	result := map[string]any{"service": service, "manifest": manifestPath, "manifest_version": m.Version, "resources": len(manageResources(m)), "targets": m.Targets, "target_states": inspectManageTargetStates(m)}
 	return manageOutput(result)
 }
 func manageVerify(m manageManifest, service string) error {
@@ -459,7 +515,7 @@ func manageVerify(m manageManifest, service string) error {
 func manageSnapshot(m manageManifest, manifestPath, service string, s scope) error {
 	return manageSnapshotWithOverrides(m, manifestPath, service, s, nil)
 }
-func manageSnapshotWithOverrides(m manageManifest, manifestPath, service string, s scope, overrides map[string]string) error {
+func manageSnapshotWithOverridesLegacy(m manageManifest, manifestPath, service string, s scope, overrides map[string]string) error {
 	pending := map[string]string{"SERVICE": service, "SNAPSHOT_ID": "snapshot-pending", "TIMESTAMP": time.Now().UTC().Format(time.RFC3339Nano), "HOST": hostnameOrUnknown()}
 	if _, err := resolveManageConfig(m, manifestPath, service, s, overrides, pending); err != nil {
 		return err
@@ -664,18 +720,50 @@ func manageFail(op manageOperation, err error, s scope) error {
 }
 
 func manageSnapshots(service string, s scope) error {
+	return manageListSnapshots(service, s, false)
+}
+
+func manageBackups(service string, s scope) error {
+	return manageListSnapshots(service, s, true)
+}
+
+func manageListSnapshots(service string, s scope, backupsOnly bool) error {
 	root := filepath.Join(manageStateDir(s), service, "snapshots")
-	entries, _ := os.ReadDir(root)
+	entries, err := os.ReadDir(root)
+	if os.IsNotExist(err) {
+		entries = nil
+	} else if err != nil {
+		return err
+	}
 	out := []manageSnapshotMeta{}
-	for _, e := range entries {
-		b, err := os.ReadFile(filepath.Join(root, e.Name(), "manifest.json"))
-		if err != nil {
+	for _, entry := range entries {
+		if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".partial-") {
 			continue
 		}
-		var m manageSnapshotMeta
-		if json.Unmarshal(b, &m) == nil {
-			out = append(out, m)
+		dir := filepath.Join(root, entry.Name())
+		meta, err := readSnapshotMeta(dir)
+		if err != nil {
+			meta = manageSnapshotMeta{ID: entry.Name(), State: "invalid", Complete: false}
+			if b, readErr := os.ReadFile(filepath.Join(dir, "manifest.json")); readErr == nil {
+				_ = json.Unmarshal(b, &meta)
+				meta.State, meta.Complete = "invalid", false
+			}
+		} else if meta.State == "verified" && meta.Complete && meta.SnapshotFormat == manageSnapshotFormatVersion {
+			if err := verifySnapshotDirectoryV2(dir, meta, meta.Encryption == "none"); err == nil {
+				backend, backendErr := manageBackend(meta.Backend)
+				if backendErr == nil && (backend.Name == "local" && backend.Type == "local" || verifyRemoteBackup(backend, meta, dir) == nil) {
+					// Retain verified state only after a fresh local and remote check.
+				} else {
+					meta.State, meta.Complete = "invalid", false
+				}
+			} else {
+				meta.State, meta.Complete = "invalid", false
+			}
 		}
+		if backupsOnly && meta.Operation != "backup" {
+			continue
+		}
+		out = append(out, meta)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt > out[j].CreatedAt })
 	if manageJSON {
@@ -683,13 +771,13 @@ func manageSnapshots(service string, s scope) error {
 		fmt.Println(string(b))
 		return nil
 	}
-	for _, m := range out {
-		fmt.Printf("%s\t%s\tstate=%s\tbackend=%s\tencryption=%s\tsize=%d\n", m.ID, m.CreatedAt, m.State, m.Backend, m.Encryption, m.Size)
+	for _, meta := range out {
+		fmt.Printf("%s\t%s\tstate=%s\tbackend=%s\tencryption=%s\tsize=%d\n", meta.ID, meta.CreatedAt, meta.State, meta.Backend, meta.Encryption, meta.Size)
 	}
 	return nil
 }
 
-func manageRestore(m manageManifest, manifestPath, service, id string, s scope) error {
+func manageRestoreLegacy(m manageManifest, manifestPath, service, id string, s scope) error {
 	unlock, err := manageLock(service, s)
 	if err != nil {
 		return err

@@ -304,8 +304,8 @@ func ftpTransfer(backend manageBackendConfig, object, path string, download bool
 	return nil
 }
 
-func manageEnsureSnapshotPayload(meta manageSnapshotMeta, dir string) (string, func(), error) {
-	if meta.SnapshotFormat != manageSnapshotFormatVersion {
+func manageEnsureSnapshotPayloadV1(meta manageSnapshotMeta, dir string) (string, func(), error) {
+	if meta.SnapshotFormat != 1 {
 		return "", func() {}, fmt.Errorf("unsupported snapshot format %d", meta.SnapshotFormat)
 	}
 	if meta.State != "verified" || !meta.Complete {
@@ -385,56 +385,116 @@ func manageEnsureSnapshotPayload(meta manageSnapshotMeta, dir string) (string, f
 	}, nil
 }
 func safeExtractSnapshot(archive, destination string) error {
-	listing, err := exec.Command("tar", "-tzf", archive).Output()
-	if err != nil {
-		return fmt.Errorf("validate snapshot archive: %w", err)
-	}
-	for _, entry := range strings.Split(strings.TrimSpace(string(listing)), "\n") {
-		name := filepath.Clean(entry)
-		if name == "." || filepath.IsAbs(name) || name == ".." || strings.HasPrefix(name, ".."+string(filepath.Separator)) {
-			return errors.New("snapshot archive contains unsafe path")
-		}
-	}
-	cmd := exec.Command("tar", "-xzf", archive, "-C", destination)
-	cmd.Stdout, cmd.Stderr = io.Discard, io.Discard
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("extract snapshot archive: %w", err)
+	if _, err := extractSnapshotV2(archive, destination); err != nil {
+		return fmt.Errorf("validate/extract snapshot archive: %w", err)
 	}
 	return nil
 }
 func validateSnapshotResources(meta manageSnapshotMeta, manifest manageManifest) error {
 	declared := map[string]bool{}
 	for _, resource := range manageResources(manifest) {
-		declared[resource.Path] = true
+		declared[filepath.Clean(resource.Path)] = true
 	}
+	if meta.SnapshotFormat == manageSnapshotFormatVersion && len(meta.Resources) != len(declared) {
+		return errors.New("snapshot included-resource set does not match service manifest")
+	}
+	seenPaths := map[string]bool{}
 	for _, resource := range meta.Resources {
-		if !declared[resource.Path] {
+		rootPath := filepath.Clean(resource.Path)
+		if !declared[rootPath] {
 			return fmt.Errorf("snapshot resource is not declared by manifest: %s", resource.Path)
 		}
-		clean := filepath.Clean(filepath.FromSlash(resource.SnapshotPath))
-		if clean == "." || filepath.IsAbs(filepath.FromSlash(resource.SnapshotPath)) || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
-			return errors.New("snapshot contains unsafe resource path")
+		if err := validateCapturedTree(resource, rootPath, resource.SnapshotPath, seenPaths, meta.SnapshotFormat == manageSnapshotFormatVersion); err != nil {
+			return err
+		}
+	}
+	for _, excluded := range meta.Excluded {
+		found := false
+		for root := range declared {
+			rel, err := filepath.Rel(root, filepath.Clean(excluded.Path))
+			if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
+				found = true
+				break
+			}
+		}
+		if !found || excluded.Reason == "" {
+			return errors.New("snapshot contains an invalid excluded-resource record")
+		}
+	}
+	return nil
+}
+
+func validateCapturedTree(entry manageCaptured, sourceRoot, snapshotRoot string, seen map[string]bool, strict bool) error {
+	if entry.Path == "" || filepath.Clean(entry.Path) != entry.Path {
+		return fmt.Errorf("snapshot contains invalid source path %q", entry.Path)
+	}
+	if entry.Path != sourceRoot {
+		rel, err := filepath.Rel(sourceRoot, entry.Path)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
+			return fmt.Errorf("snapshot resource path escapes declared root: %s", entry.Path)
+		}
+	}
+	clean := filepath.Clean(filepath.FromSlash(entry.SnapshotPath))
+	if entry.SnapshotPath == "" || filepath.IsAbs(filepath.FromSlash(entry.SnapshotPath)) || clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+		return errors.New("snapshot contains unsafe relative resource path")
+	}
+	if entry.SnapshotPath != snapshotRoot {
+		rel, err := filepath.Rel(filepath.FromSlash(snapshotRoot), filepath.FromSlash(entry.SnapshotPath))
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
+			return errors.New("nested snapshot resource escapes its declared resource")
+		}
+	}
+	if seen[entry.SnapshotPath] {
+		return fmt.Errorf("duplicate snapshot resource path %q", entry.SnapshotPath)
+	}
+	seen[entry.SnapshotPath] = true
+	if entry.UID < 0 || entry.GID < 0 || entry.Size < 0 || (strict && entry.Mode > 0o777) {
+		return fmt.Errorf("snapshot contains invalid mode, ownership, or size for %s", entry.Path)
+	}
+	switch entry.Kind {
+	case "file":
+		if strict && !sha256Pattern.MatchString(entry.SHA256) {
+			return fmt.Errorf("snapshot file hash is missing or invalid: %s", entry.Path)
+		}
+	case "directory":
+	case "symlink":
+		if strict && (entry.Link == "" || int64(len(entry.Link)) != entry.Size) {
+			return fmt.Errorf("snapshot symlink metadata is invalid: %s", entry.Path)
+		}
+	case "":
+		if strict {
+			return fmt.Errorf("snapshot resource type is missing: %s", entry.Path)
+		}
+	default:
+		return fmt.Errorf("unsupported snapshot resource type %q", entry.Kind)
+	}
+	for _, child := range entry.Entries {
+		if err := validateCapturedTree(child, sourceRoot, snapshotRoot, seen, strict); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 func verifySnapshotPayload(meta manageSnapshotMeta, root string) error {
-	for _, c := range meta.Resources {
-		p := filepath.Join(root, filepath.FromSlash(c.SnapshotPath))
-		info, err := os.Lstat(p)
-		if err != nil {
-			return fmt.Errorf("snapshot resource missing: %s", c.Path)
-		}
-		if c.Kind == "symlink" {
-			link, e := os.Readlink(p)
-			if e != nil || link != c.Link {
-				return fmt.Errorf("snapshot symlink mismatch: %s", c.Path)
+	if meta.SnapshotFormat == 1 {
+		for _, c := range meta.Resources {
+			p := filepath.Join(root, filepath.FromSlash(c.SnapshotPath))
+			info, err := os.Lstat(p)
+			if err != nil {
+				return fmt.Errorf("snapshot resource missing: %s", c.Path)
 			}
+			if c.Kind == "symlink" {
+				link, e := os.Readlink(p)
+				if e != nil || link != c.Link {
+					return fmt.Errorf("snapshot symlink mismatch: %s", c.Path)
+				}
+			}
+			if c.Kind == "file" && c.SHA256 != "" && manageHash(p) != c.SHA256 {
+				return fmt.Errorf("snapshot resource checksum mismatch: %s", c.Path)
+			}
+			_ = info
 		}
-		if c.Kind == "file" && c.SHA256 != "" && manageHash(p) != c.SHA256 {
-			return fmt.Errorf("snapshot resource checksum mismatch: %s", c.Path)
-		}
-		_ = info
+		return nil
 	}
-	return nil
+	return verifySnapshotPayloadV2(meta, root, false)
 }

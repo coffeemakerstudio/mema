@@ -79,6 +79,32 @@ toolchains under `/opt/mema` or `$HOME/.local/share/mema`. Removing the package
 removes Mema-managed package files, not downloaded toolchain directories; use
 `mema remove <tool> [version]` to remove toolchains explicitly.
 
+### Service snapshots and recovery
+
+Opt-in service management manifests live in `/etc/mema/recipe/manage/<service>.json`
+(or the selected recipe directory's `manage/` subdirectory). A manifest must
+declare the exact persistent resource paths, exclusions, service targets, health
+checks, and backup policy; Mema does not infer or broaden those paths. Use
+`mema manage <service> snapshot`, `snapshots`, `verify <snapshot-id>`,
+`backup`, and `backups`. Restore is staged, verified, promoted transactionally,
+and rolled back if activation or health checks fail:
+
+```sh
+sudo mema manage <service> snapshot
+sudo mema manage <service> verify <snapshot-id>
+sudo mema manage <service> restore <snapshot-id>
+```
+
+New snapshots use format v2. For encrypted recovery, keep the recipient's GPG
+private key and any non-local backend configuration available on the recovery
+host (`/etc/mema/backends.json`); snapshot writers need only the public key.
+A self-describing bundle can be checked or restored with
+`mema recover verify <snapshot-directory>` or `mema recover restore
+<snapshot-directory>`. Test recovery on an isolated host before relying on it.
+SHA-256 metadata detects accidental corruption and unexpected archive changes;
+it is not a digital signature or proof of who created a backup. Protect backup
+storage and recovery inputs accordingly.
+
 ---
 
 ## 🛠️ Writing a Recipe

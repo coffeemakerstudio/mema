@@ -42,8 +42,12 @@ type managePlanResource struct {
 type managePlanTarget struct {
 	Name         string            `json:"name"`
 	Type         string            `json:"type"`
+	Scope        string            `json:"scope,omitempty"`
 	Units        []string          `json:"units,omitempty"`
 	Configs      []string          `json:"configs,omitempty"`
+	Binary       string            `json:"binary,omitempty"`
+	Config       string            `json:"config,omitempty"`
+	Prefix       string            `json:"prefix,omitempty"`
 	Active       map[string]string `json:"active,omitempty"`
 	Enabled      map[string]string `json:"enabled,omitempty"`
 	FragmentPath map[string]string `json:"fragment_path,omitempty"`
@@ -90,7 +94,7 @@ func managePlanRestore(m manageManifest, manifestPath, service, id string, s sco
 	if err != nil {
 		return err
 	}
-	if meta.SnapshotFormat != manageSnapshotFormatVersion || !meta.Complete || meta.State != "verified" {
+	if (meta.SnapshotFormat != 1 && meta.SnapshotFormat != manageSnapshotFormatVersion) || !meta.Complete || meta.State != "verified" {
 		return fmt.Errorf("snapshot %q is not verified and recoverable", id)
 	}
 	if err := validateSnapshotResources(meta, m); err != nil {
@@ -261,18 +265,30 @@ func managePlanTargets(m manageManifest) []managePlanTarget {
 	out := make([]managePlanTarget, 0, len(names))
 	for _, name := range names {
 		target := m.Targets[name]
-		item := managePlanTarget{Name: name, Type: target.Type, Units: target.Units, Configs: target.Configs}
-		if target.Type == "systemd" {
+		item := managePlanTarget{Name: name, Type: target.Type, Scope: target.Scope, Units: target.Units, Configs: target.Configs, Binary: target.Binary, Config: target.Config, Prefix: target.Prefix}
+		if target.Type == "systemd" || (target.Type == "nginx" && len(target.Units) > 0) {
 			item.Active, item.Enabled, item.FragmentPath = map[string]string{}, map[string]string{}, map[string]string{}
 			for _, unit := range target.Units {
-				item.Active[unit] = manageCommandFact("systemctl", "is-active", unit)
-				item.Enabled[unit] = manageCommandFact("systemctl", "is-enabled", unit)
-				item.FragmentPath[unit] = manageCommandFact("systemctl", "show", "-p", "FragmentPath", "--value", unit)
+				item.Active[unit] = manageTargetCommandFact(target, "is-active", unit)
+				item.Enabled[unit] = manageTargetCommandFact(target, "is-enabled", unit)
+				item.FragmentPath[unit] = manageTargetCommandFact(target, "show", "-p", "FragmentPath", "--value", unit)
 			}
 		}
 		out = append(out, item)
 	}
 	return out
+}
+
+func manageTargetCommandFact(target manageTarget, args ...string) string {
+	output, err := exec.Command("systemctl", managedSystemctlArgs(target, args...)...).Output()
+	value := strings.TrimSpace(string(output))
+	if value == "" && err != nil {
+		return "unavailable"
+	}
+	if value == "" {
+		return "unknown"
+	}
+	return value
 }
 
 func manageCommandFact(command string, args ...string) string {

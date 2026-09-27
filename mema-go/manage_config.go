@@ -199,7 +199,7 @@ func resolveManageConfig(m manageManifest, manifestPath, service string, s scope
 	}
 	backup := m.Backup
 	if backup.Format == "" {
-		backup.Format = "mema-snapshot-v1"
+		backup.Format = "mema-snapshot-v2"
 	}
 	if backup.Backend == "" {
 		backup.Backend = m.Snapshot.Backend
@@ -426,7 +426,7 @@ func parseManageDuration(value string) (time.Duration, error) {
 	return time.ParseDuration(value)
 }
 func validateBackupPolicy(b manageBackupPolicy) error {
-	if b.Format != "mema-snapshot-v1" {
+	if b.Format != "mema-snapshot-v1" && b.Format != "mema-snapshot-v2" {
 		return fmt.Errorf("unsupported backup format %q", b.Format)
 	}
 	if b.Encryption.Type != "" && b.Encryption.Type != "gpg" {
@@ -461,9 +461,9 @@ func validateUnsupportedInterpolation(m manageManifest) error {
 				return errors.New("variables are not supported in systemd targets")
 			}
 		}
-		for _, p := range t.Configs {
+		for _, p := range append(append([]string{}, t.Configs...), t.Binary, t.Config, t.Prefix) {
 			if strings.Contains(p, "${") {
-				return errors.New("variables are not supported in nginx targets")
+				return errors.New("variables are not supported in service targets")
 			}
 		}
 	}

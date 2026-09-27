@@ -25,7 +25,7 @@ does not need the original application). Its top-level shape is:
   "binary": [{"path": "/opt/example/bin/example"}],
   "cleanup": [{"path": "/var/lib/example/old", "clean": "quarantine"}],
   "targets": {
-    "runtime": {"type": "systemd", "units": ["example.service"]},
+    "runtime": {"type": "systemd", "scope": "system", "units": ["example.service"]},
     "reverse_proxy": {"type": "nginx", "configs": ["/etc/nginx/sites-available/example"]}
   },
   "health": {"ready": "http://127.0.0.1:8080/ready", "version": "http://127.0.0.1:8080/version"},
@@ -46,6 +46,8 @@ mema manage <service> status [--json]
 mema manage <service> verify [--json]
 mema manage <service> snapshot [--dry-run] [--print] [--json]
 mema manage <service> snapshots [--json]
+mema manage <service> backup [--dry-run] [--json]
+mema manage <service> backups [--json]
 mema manage <service> restore <snapshot> [--dry-run] [--print] [--json]
 mema manage <service> update [<version>] [--json]
 mema manage <service> rollback [<version-or-snapshot>] [--json]
@@ -59,9 +61,30 @@ mema manage <service> config [--json]
 
 Snapshots preserve original absolute destinations in metadata and capture file,
 directory, symlink, mode, ownership metadata, and SHA-256 values for regular
-files. Restore reconstructs missing parent directories and resources instead of
-assuming the original service exists. Systemd and nginx are target adapters;
-nginx is validated before reload.
+files. Restore stages and verifies replacements, promotes them transactionally,
+and rolls back on activation or health failure. Declared systemd units preserve
+their running state during `snapshot` quiescence; restore treats declared units
+as desired-active targets and starts them even if they were stopped before the
+restore. Systemd targets accept `scope: "system"` (the default) or `scope:
+"user"` and never fall back between managers.
+
+A dedicated nginx instance can be declared with a trusted executable, its main
+configuration, prefix, and the exact systemd unit that owns it:
+
+```json
+"reverse_proxy": {
+  "type": "nginx", "scope": "user",
+  "units": ["example-nginx.service"],
+  "binary": "/usr/sbin/nginx",
+  "config": "/home/example/.local/share/example-nginx/nginx.conf",
+  "prefix": "/home/example/.local/share/example-nginx/"
+}
+```
+
+For this isolated form, MEMA tests only that nginx configuration (`-t -p … -c
+…`) and starts/reloads/stops only the declared unit. It does not reload the host's
+global nginx service. Legacy nginx targets without an explicit unit retain the
+system nginx reload behavior.
 
 `clean` renames eligible resources into managed quarantine. `clean full` first
 performs normal quarantine and then considers only **previously** quarantined,
@@ -139,10 +162,21 @@ backends, and unsafe object names fail before a mutating operation begins.
 
 ## Encrypted and remote snapshots
 
-Snapshots use **Mema Snapshot Format v1**, independently of Manifest v1. The
-metadata records a lifecycle state such as `creating`, `captured`,
-`encrypted`, `uploading`, `verified`, or `failed`. Unknown snapshot formats and
-non-verified snapshots fail closed during restore.
+New snapshots and backups use **Mema Snapshot Format v2**, independently of
+Manifest v1. V1 snapshots remain readable for compatibility; new writes require
+v2. Metadata records a random identity, embedded manifest checksum, payload
+checksum, resource metadata, exclusions, backend, and lifecycle state. V2
+publication is staged and a snapshot is not listed as verified unless its local
+artifact and configured remote copy verify. `backup` and `backups` provide
+explicit backup operations/listing; unknown formats and non-verified snapshots
+fail closed during restore. Managed restore selects the payload reader from
+snapshot metadata and accepts v1-to-v2 manifest changes limited to backup
+format/encryption policy and resource exclusion patterns. Captured resource
+roots, targets, health checks, and other service configuration must still
+match. Exclusions govern future capture; the artifact metadata defines the
+restore contents. Prefix an exclusion with `./` to anchor it to the resource
+root; an unanchored basename pattern matches at any depth. Standalone
+`mema recover` uses the embedded manifest for restoration.
 
 A manifest can select an encryption recipient and backend:
 
