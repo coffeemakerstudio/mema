@@ -174,6 +174,13 @@ Go and Bun binaries.
 
 ---
 
+## Contact
+
+For Mema project and package support, contact
+[mema@lupricht.net](mailto:mema@lupricht.net). For security vulnerability
+reports, use [mema-security@lupricht.net](mailto:mema-security@lupricht.net)
+so reports can be handled separately; see [SECURITY.md](SECURITY.md).
+
 **Built for efficiency. Engineered for stability.**
 
 *Developed by [Eugen Lupricht](https://github.com/eugen252009)*
