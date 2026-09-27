@@ -6,14 +6,16 @@ MAINTAINER="Coffee Maker Studio <mema@lupricht.net>"
 HOMEPAGE="https://github.com/coffeemakerstudio/mema"
 OUT_DIR="${OUT_DIR:-dist}"
 PACKAGE_ARCH="${MEMA_ARCH:-all}"
+RECIPE_BUILD_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/mema-recipe.XXXXXXXX")
+trap 'rm -rf -- "$RECIPE_BUILD_ROOT"' EXIT
 
 [ -d "$RECIPE_DIR" ] || { printf 'Error: directory %s not found.\n' "$RECIPE_DIR" >&2; exit 1; }
-rm -rf "/tmp/mema-recipe" "$OUT_DIR"
+rm -rf -- "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
 build_deb() {
     local path="$1" output="$2"
-    dpkg-deb --build "$path" "$output" >/dev/null
+    dpkg-deb --build --root-owner-group "$path" "$output" >/dev/null
 }
 
 validate_package_version() {
@@ -60,7 +62,7 @@ recipe_install_commands() {
 
 build_recipe_package() {
     local package_name="$1" package_version="$2" package_depends="$3"
-    local build_path="/tmp/mema-recipe/$package_name"
+    local build_path="$RECIPE_BUILD_ROOT/$package_name"
     mkdir -p "$build_path/DEBIAN" "$build_path/etc/mema/recipe"
     cp "$recipe" "$build_path/etc/mema/recipe/"
     cat > "$build_path/DEBIAN/control" <<EOF
@@ -106,7 +108,7 @@ for recipe in "$RECIPE_DIR"/*/*.sh; do
     esac
     if [ "${MEMA_AUTOINSTALL:-0}" = "1" ]; then
         RECIPE_DEPS=$(recipe_package_dependencies)
-        build_path="/tmp/mema-recipe/mema-$NAME"
+        build_path="$RECIPE_BUILD_ROOT/mema-$NAME"
         mkdir -p "$build_path/DEBIAN" "$build_path/etc/mema/recipe"
         cp "$recipe" "$build_path/etc/mema/recipe/"
         cat > "$build_path/DEBIAN/control" <<EOF
@@ -134,7 +136,7 @@ EOF
         for dependency in ${MEMA_DEPENDS:-}; do
             legacy_deps="${legacy_deps:+$legacy_deps, }mema-$dependency-latest"
         done
-        latest_path="/tmp/mema-recipe/mema-$NAME-latest"
+        latest_path="$RECIPE_BUILD_ROOT/mema-$NAME-latest"
         mkdir -p "$latest_path/DEBIAN"
         cat > "$latest_path/DEBIAN/control" <<EOF
 Package: mema-$NAME-latest
