@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added exact-path typed UNIX-socket exclusions for volatile snapshot entries; unexpected sockets and non-socket substitutions still fail closed.
 - Added a Debian `bookworm-slim` outside-container package test.
 - Added CLI unit tests and verified-download helper tests.
 - Enforced HTTPS downloads, strict SHA-256 inputs, and safe managed paths.

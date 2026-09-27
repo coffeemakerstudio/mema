@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.4.0}"
+VERSION="${VERSION:-0.4.1}"
 SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git show -s --format=%ct HEAD 2>/dev/null || date +%s)}"
 export SOURCE_DATE_EPOCH

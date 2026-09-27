@@ -29,3 +29,32 @@ func TestManageRestoreRejectsSnapshotPathTraversal(t *testing.T) {
 		t.Fatal("snapshot path traversal was accepted")
 	}
 }
+
+func TestManageRestoreRejectsMergedUsrAndArbitrarySymlinkParents(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "usr", "lib", "systemd", "system"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("usr", filepath.Join(root, "lib")); err != nil {
+		t.Fatal(err)
+	}
+	for _, destination := range []string{
+		filepath.Join(root, "lib", "systemd", "system", "tparun.service"),
+		filepath.Join(root, "usr", "lib", "systemd", "system", "tparun.service"),
+	} {
+		err := validateRestoreDestinations([]manageCaptured{{Path: destination}})
+		if destination == filepath.Join(root, "lib", "systemd", "system", "tparun.service") && err == nil {
+			t.Fatalf("merged-/usr symlink-parent destination %q was accepted", destination)
+		}
+		if destination == filepath.Join(root, "usr", "lib", "systemd", "system", "tparun.service") && err != nil {
+			t.Fatalf("canonical non-symlink destination %q was rejected: %v", destination, err)
+		}
+	}
+	link := filepath.Join(root, "arbitrary-link")
+	if err := os.Symlink("usr", link); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateRestoreDestinations([]manageCaptured{{Path: filepath.Join(link, "lib", "service.conf")}}); err == nil {
+		t.Fatal("arbitrary symlink-parent destination was accepted")
+	}
+}

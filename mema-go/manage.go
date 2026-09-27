@@ -27,13 +27,14 @@ import (
 const manageManifestVersion = 1
 
 type manageResource struct {
-	Path     string   `json:"path"`
-	Role     string   `json:"role,omitempty"`
-	Type     string   `json:"type,omitempty"`
-	Secret   bool     `json:"secret,omitempty"`
-	Critical bool     `json:"critical,omitempty"`
-	Clean    string   `json:"clean,omitempty"` // never, quarantine, temporary, managed-history
-	Exclude  []string `json:"exclude,omitempty"`
+	Path           string   `json:"path"`
+	Role           string   `json:"role,omitempty"`
+	Type           string   `json:"type,omitempty"`
+	Secret         bool     `json:"secret,omitempty"`
+	Critical       bool     `json:"critical,omitempty"`
+	Clean          string   `json:"clean,omitempty"` // never, quarantine, temporary, managed-history
+	Exclude        []string `json:"exclude,omitempty"`
+	ExcludeSockets []string `json:"exclude_sockets,omitempty"`
 }
 
 type manageTarget struct {
@@ -135,6 +136,7 @@ type manageSnapshotMeta struct {
 
 type manageExcluded struct {
 	Path   string `json:"path"`
+	Kind   string `json:"kind,omitempty"`
 	Reason string `json:"reason"`
 }
 

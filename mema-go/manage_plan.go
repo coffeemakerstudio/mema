@@ -26,17 +26,19 @@ type managePlan struct {
 }
 
 type managePlanResource struct {
-	Path        string `json:"path"`
-	Role        string `json:"role,omitempty"`
-	Type        string `json:"type,omitempty"`
-	Present     bool   `json:"present"`
-	Kind        string `json:"kind,omitempty"`
-	Mode        string `json:"mode,omitempty"`
-	Owner       string `json:"owner,omitempty"`
-	SHA256      string `json:"sha256,omitempty"`
-	Secret      bool   `json:"secret,omitempty"`
-	Destination string `json:"destination,omitempty"`
-	Conflict    bool   `json:"conflict,omitempty"`
+	Path           string   `json:"path"`
+	Role           string   `json:"role,omitempty"`
+	Type           string   `json:"type,omitempty"`
+	Present        bool     `json:"present"`
+	Kind           string   `json:"kind,omitempty"`
+	Mode           string   `json:"mode,omitempty"`
+	Owner          string   `json:"owner,omitempty"`
+	SHA256         string   `json:"sha256,omitempty"`
+	Secret         bool     `json:"secret,omitempty"`
+	Destination    string   `json:"destination,omitempty"`
+	Conflict       bool     `json:"conflict,omitempty"`
+	Exclude        []string `json:"exclude,omitempty"`
+	ExcludeSockets []string `json:"exclude_sockets,omitempty"`
 }
 
 type managePlanTarget struct {
@@ -223,7 +225,7 @@ func managePlanBackup(cfg manageResolvedConfig) map[string]any {
 func managePlanResources(m manageManifest) []managePlanResource {
 	resources := make([]managePlanResource, 0, len(manageResources(m)))
 	for _, resource := range manageResources(m) {
-		item := managePlanResource{Path: resource.Path, Role: resource.Role, Type: resource.Type, Secret: resource.Secret}
+		item := managePlanResource{Path: resource.Path, Role: resource.Role, Type: resource.Type, Secret: resource.Secret, Exclude: resource.Exclude, ExcludeSockets: resource.ExcludeSockets}
 		info, err := os.Lstat(resource.Path)
 		if err != nil {
 			resources = append(resources, item)

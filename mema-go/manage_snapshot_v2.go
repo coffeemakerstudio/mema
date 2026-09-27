@@ -125,7 +125,7 @@ func manageSnapshotV2(m manageManifest, manifestPath, service string, s scope, o
 	for index, resource := range manageResources(m) {
 		dstRel := fmt.Sprintf("resources/%04d", index)
 		dst := filepath.Join(stagingDir, "filesystem", filepath.FromSlash(dstRel))
-		captured, excluded, err := manageCaptureV2(resource.Path, dst, dstRel, resource.Exclude)
+		captured, excluded, err := manageCaptureV2(resource.Path, dst, dstRel, resource.Exclude, resource.ExcludeSockets)
 		if err != nil {
 			return manageFail(op, fmt.Errorf("capture %s: %w", resource.Path, err), s)
 		}
@@ -496,20 +496,35 @@ func inspectManageTargetStates(manifest manageManifest) map[string]map[string]st
 	return states
 }
 
-func manageCaptureV2(src, dst, snapshotRoot string, excludes []string) (manageCaptured, []manageExcluded, error) {
+func manageCaptureV2(src, dst, snapshotRoot string, excludes, excludeSockets []string) (manageCaptured, []manageExcluded, error) {
+	return manageCaptureV2WithLstat(src, dst, snapshotRoot, excludes, excludeSockets, os.Lstat)
+}
+
+func manageCaptureV2WithLstat(src, dst, snapshotRoot string, excludes, excludeSockets []string, lstat func(string) (os.FileInfo, error)) (manageCaptured, []manageExcluded, error) {
 	var excluded []manageExcluded
-	rootInfo, err := os.Lstat(src)
+	rootInfo, err := lstat(src)
 	if err != nil {
 		return manageCaptured{}, nil, fmt.Errorf("required resource is unavailable: %w", err)
 	}
 	var walk func(string, string, string, string) (manageCaptured, error)
 	walk = func(source, dest, snapshotRelative, resourceRelative string) (manageCaptured, error) {
-		info, err := os.Lstat(source)
+		info, err := lstat(source)
 		if err != nil {
+			if resourceRelative != "" && os.IsNotExist(err) && matchesExactSnapshotExclusion(resourceRelative, excludeSockets) {
+				excluded = append(excluded, manageExcluded{Path: source, Kind: "socket", Reason: "declared transient socket disappeared during capture"})
+				return manageCaptured{}, errSnapshotExcluded
+			}
 			return manageCaptured{}, err
 		}
 		if resourceRelative != "" && matchesSnapshotExclusion(resourceRelative, excludes) {
 			excluded = append(excluded, manageExcluded{Path: source, Reason: "manifest exclusion"})
+			return manageCaptured{}, errSnapshotExcluded
+		}
+		if resourceRelative != "" && matchesExactSnapshotExclusion(resourceRelative, excludeSockets) {
+			if info.Mode()&os.ModeSocket == 0 {
+				return manageCaptured{}, fmt.Errorf("declared transient socket path is not a UNIX socket: %s", source)
+			}
+			excluded = append(excluded, manageExcluded{Path: source, Kind: "socket", Reason: "manifest transient socket exclusion"})
 			return manageCaptured{}, errSnapshotExcluded
 		}
 		entry := manageCaptured{Path: source, SnapshotPath: filepath.ToSlash(snapshotRelative), Mode: uint32(info.Mode().Perm()), Kind: "file", Size: info.Size()}
@@ -582,6 +597,15 @@ func manageCaptureV2(src, dst, snapshotRoot string, excludes []string) (manageCa
 
 var errSnapshotExcluded = errors.New("snapshot resource intentionally excluded")
 
+func matchesExactSnapshotExclusion(relative string, paths []string) bool {
+	for _, candidate := range paths {
+		if relative == candidate {
+			return true
+		}
+	}
+	return false
+}
+
 func matchesSnapshotExclusion(relative string, patterns []string) bool {
 	for _, pattern := range patterns {
 		if strings.HasPrefix(pattern, "./") && strings.TrimPrefix(pattern, "./") == relative {
@@ -646,6 +670,22 @@ func validateSnapshotResourceSet(resources []manageResource) error {
 			if unsafe {
 				return fmt.Errorf("invalid snapshot exclusion %q", pattern)
 			}
+		}
+		seenSockets := map[string]bool{}
+		for _, socketPath := range resource.ExcludeSockets {
+			unsafe := socketPath == "" || strings.HasPrefix(socketPath, "/") || strings.ContainsAny(socketPath, "\\\x00*?[]") || filepath.ToSlash(filepath.Clean(filepath.FromSlash(socketPath))) != socketPath
+			for _, component := range strings.Split(socketPath, "/") {
+				if component == "" || component == "." || component == ".." {
+					unsafe = true
+				}
+			}
+			if unsafe || seenSockets[socketPath] {
+				return fmt.Errorf("invalid snapshot socket exclusion %q", socketPath)
+			}
+			if matchesSnapshotExclusion(socketPath, resource.Exclude) {
+				return fmt.Errorf("snapshot path %q has overlapping file and socket exclusions", socketPath)
+			}
+			seenSockets[socketPath] = true
 		}
 	}
 	sort.Strings(paths)
@@ -1069,6 +1109,7 @@ func clearManifestExclusions(manifest manageManifest) manageManifest {
 		resources = append([]manageResource(nil), resources...)
 		for i := range resources {
 			resources[i].Exclude = nil
+			resources[i].ExcludeSockets = nil
 		}
 		return resources
 	}

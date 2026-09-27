@@ -392,7 +392,8 @@ func safeExtractSnapshot(archive, destination string) error {
 }
 func validateSnapshotResources(meta manageSnapshotMeta, manifest manageManifest) error {
 	declared := map[string]bool{}
-	for _, resource := range manageResources(manifest) {
+	declaredResources := manageResources(manifest)
+	for _, resource := range declaredResources {
 		declared[filepath.Clean(resource.Path)] = true
 	}
 	if meta.SnapshotFormat == manageSnapshotFormatVersion && len(meta.Resources) != len(declared) {
@@ -417,8 +418,24 @@ func validateSnapshotResources(meta manageSnapshotMeta, manifest manageManifest)
 				break
 			}
 		}
-		if !found || excluded.Reason == "" {
+		if !found || excluded.Reason == "" || filepath.Clean(excluded.Path) != excluded.Path {
 			return errors.New("snapshot contains an invalid excluded-resource record")
+		}
+		if excluded.Kind != "" {
+			validTypedExclusion := false
+			if excluded.Kind == "socket" {
+				for _, resource := range declaredResources {
+					root := filepath.Clean(resource.Path)
+					rel, err := filepath.Rel(root, excluded.Path)
+					if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) && matchesExactSnapshotExclusion(filepath.ToSlash(rel), resource.ExcludeSockets) {
+						validTypedExclusion = true
+						break
+					}
+				}
+			}
+			if !validTypedExclusion {
+				return errors.New("snapshot contains an undeclared typed exclusion")
+			}
 		}
 	}
 	return nil
