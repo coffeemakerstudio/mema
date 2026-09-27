@@ -5,6 +5,15 @@ on:
     branches: [ main, dev ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      repository_mode:
+        description: Retention repair or a versioned core-package release
+        required: true
+        type: choice
+        options:
+          - retention-repair
+          - core-release
 
 jobs:
   test-recipes:
@@ -15,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Environment
         run: |
@@ -27,7 +38,7 @@ jobs:
           go-version-file: mema-go/go.mod
 
       - name: Import GPG Key
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -37,22 +48,41 @@ jobs:
 
       # The imported secret key must match the fingerprint published in mema.gpg.
 
-      - name: Build Packages
+      - name: Build or restore repository artifacts
+        shell: bash
         run: |
-          ./build-repo.sh
-          MEMA_ARCH=riscv64 DIST_DIR=dist-riscv64 DEB_DIR=debs-riscv64 ./build-repo.sh
-          cp dist-riscv64/mema-*.deb dist/
-          cp dist-riscv64/mema_*_riscv64.deb dist/
-          (
-            cd dist
-            apt-ftparchive packages . > Packages
-            gzip -kf Packages
-            apt-ftparchive release . > Release
-          )
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            gpg --batch --yes --dearmor -o dist/mema-keyring.gpg mema.gpg
-            gpg --batch --yes --local-user "${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}" --clearsign --digest-algo SHA256 -o dist/InRelease dist/Release
-            gpg --batch --yes --local-user "${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}" --armor --detach-sign --digest-algo SHA256 -o dist/Release.gpg dist/Release
+          set -Eeuo pipefail
+          MODE="${{ inputs.repository_mode }}"
+          MODE="${MODE:-validation}"
+          SIGNING_KEY="${MEMA_SIGNING_KEY:-66315E3863522B0C320065281C7625C7FCF952B2}"
+
+          if [[ "$MODE" == retention-repair ]]; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git worktree add --detach "$RUNNER_TEMP/mema-old-pages" refs/remotes/origin/gh-pages
+            ./scripts/restore-retained-artifacts.sh repository/retained-artifacts.tsv "$RUNNER_TEMP/mema-retained"
+            MEMA_REPOSITORY_ARCHITECTURES='amd64 riscv64' \
+              ./scripts/merge-repository-artifacts.sh "$RUNNER_TEMP/mema-old-pages" "$RUNNER_TEMP/mema-retained" dist
+          elif [[ "$MODE" == core-release ]]; then
+            MEMA_BUILD_RECIPES=0 ./build-repo.sh
+            MEMA_ARCH=riscv64 MEMA_BUILD_RECIPES=0 DIST_DIR=dist-riscv64 DEB_DIR=debs-riscv64 ./build-repo.sh
+            cp dist-riscv64/mema_*.deb dist/
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git worktree add --detach "$RUNNER_TEMP/mema-old-pages" refs/remotes/origin/gh-pages
+            MEMA_REPOSITORY_ARCHITECTURES='amd64 riscv64' \
+              ./scripts/merge-repository-artifacts.sh "$RUNNER_TEMP/mema-old-pages" dist "$RUNNER_TEMP/mema-merged"
+            rm -rf dist
+            mv "$RUNNER_TEMP/mema-merged" dist
+          else
+            ./build-repo.sh
+            MEMA_ARCH=riscv64 DIST_DIR=dist-riscv64 DEB_DIR=debs-riscv64 ./build-repo.sh
+            cp dist-riscv64/mema-*.deb dist/
+            cp dist-riscv64/mema_*_riscv64.deb dist/
+            MEMA_REPOSITORY_ARCHITECTURES='amd64 riscv64' ./scripts/build-repository-index.sh dist
+          fi
+
+          if [[ "$MODE" == retention-repair || "$MODE" == core-release ]]; then
+            gpg --batch --yes --local-user "$SIGNING_KEY" --clearsign --digest-algo SHA256 -o dist/InRelease dist/Release
+            gpg --batch --yes --local-user "$SIGNING_KEY" --armor --detach-sign --digest-algo SHA256 -o dist/Release.gpg dist/Release
           fi
 
       - name: Run helper tests
@@ -63,6 +93,9 @@ jobs:
 
       - name: Test recipe dependency packages
         run: ./tests/test_recipe_dependencies.sh
+
+      - name: Test repository retention and immutable package identities
+        run: ./tests/test_repository_retention.sh
 
       - name: Run Go tests and vet
         run: |
@@ -85,7 +118,7 @@ jobs:
         run: ./tests/test_sway_poc.sh
 
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (inputs.repository_mode == 'retention-repair' || inputs.repository_mode == 'core-release')
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist     

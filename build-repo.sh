@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+cd "$ROOT"
+
 VERSION="${VERSION:-0.4.1}"
 SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git show -s --format=%ct HEAD 2>/dev/null || date +%s)}"
@@ -8,6 +11,7 @@ export SOURCE_DATE_EPOCH
 DIST_DIR="${DIST_DIR:-dist}"
 DEB_DIR="${DEB_DIR:-debs}"
 MEMA_ARCH="${MEMA_ARCH:-$(dpkg-architecture -qDEB_HOST_ARCH)}"
+MEMA_BINARY_OUTPUT="${MEMA_BINARY_OUTPUT:-$ROOT/core/mema}"
 
 case "$MEMA_ARCH" in
     amd64) GOARCH=amd64 ;;
@@ -17,6 +21,11 @@ case "$MEMA_ARCH" in
         printf 'Unsupported Debian architecture for mema: %s\n' "$MEMA_ARCH" >&2
         exit 1
         ;;
+esac
+MEMA_BUILD_RECIPES=${MEMA_BUILD_RECIPES:-1}
+case "$MEMA_BUILD_RECIPES" in
+    0|1) ;;
+    *) printf 'MEMA_BUILD_RECIPES must be 0 or 1.\n' >&2; exit 1 ;;
 esac
 
 command -v dpkg-scanpackages >/dev/null || { printf 'dpkg-scanpackages is required.\n' >&2; exit 1; }
@@ -38,10 +47,10 @@ mkdir -p "$DEB_DIR/DEBIAN" "$DEB_DIR/usr/local/bin" "$DEB_DIR/opt/mema/config.d"
 printf '%s\n' "--- Building mema $VERSION ---"
 (
     cd mema-go
-    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -trimpath -buildvcs=false -o ../core/mema .
+    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -trimpath -buildvcs=false -o "$MEMA_BINARY_OUTPUT" .
 )
 
-install -m 0755 core/mema "$DEB_DIR/usr/local/bin/mema"
+install -m 0755 "$MEMA_BINARY_OUTPUT" "$DEB_DIR/usr/local/bin/mema"
 install -m 0755 core/mema_download "$DEB_DIR/usr/local/bin/mema_download"
 install -m 0755 core/mema_find_recipes "$DEB_DIR/usr/local/bin/mema_find_recipes"
 install -m 0755 core/mema_list "$DEB_DIR/usr/local/bin/mema_list"
@@ -68,33 +77,32 @@ find "$DEB_DIR" -type d -exec chmod 755 {} +
 find "$DEB_DIR" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
 dpkg-deb --build --root-owner-group -Zzstd -z19 "$DEB_DIR" "$DIST_DIR/mema_${VERSION}_${MEMA_ARCH}.deb" >/dev/null
 
-printf '%s\n' '--- Building recipe packages ---'
-(
-    cd recipes
-    MEMA_ARCH="$MEMA_ARCH" ./build.sh
-)
+if [ "$MEMA_BUILD_RECIPES" = "1" ]; then
+    printf '%s\n' '--- Building recipe packages ---'
+    (
+        cd recipes
+        MEMA_ARCH="$MEMA_ARCH" ./build.sh
+    )
 
-shopt -s nullglob
-recipe_packages=(recipes/dist/*.deb)
-if [ "${#recipe_packages[@]}" -eq 0 ]; then
-    printf 'No recipe packages were built.\n' >&2
-    exit 1
-fi
+    shopt -s nullglob
+    recipe_packages=(recipes/dist/*.deb)
+    if [ "${#recipe_packages[@]}" -eq 0 ]; then
+        printf 'No recipe packages were built.\n' >&2
+        exit 1
+    fi
     cp "${recipe_packages[@]}" "$DIST_DIR/"
+fi
 
-(
-    cd "$DIST_DIR"
-    dpkg-scanpackages . /dev/null > Packages
-    gzip -kf Packages
-    if [ "${MEMA_SIGN:-0}" = "1" ]; then
-        gpg --batch --yes --dearmor -o mema-keyring.gpg ../mema.gpg
-    fi
-    apt-ftparchive release . > Release
-
-    if [ "${MEMA_SIGN:-0}" = "1" ]; then
-        gpg --batch --yes --local-user "$SIGNING_KEY" --clearsign --digest-algo SHA256 -o InRelease Release
-        gpg --batch --yes --local-user "$SIGNING_KEY" --armor --detach-sign --digest-algo SHA256 -o Release.gpg Release
-    fi
-)
+if [ "${MEMA_SIGN:-0}" = "1" ]; then
+    gpg --batch --yes --dearmor -o "$DIST_DIR/mema-keyring.gpg" mema.gpg
+fi
+MEMA_REPOSITORY_ARCHITECTURES="${MEMA_REPOSITORY_ARCHITECTURES:-$MEMA_ARCH}" \
+    "$ROOT/scripts/build-repository-index.sh" "$DIST_DIR"
+if [ "${MEMA_SIGN:-0}" = "1" ]; then
+    gpg --batch --yes --local-user "$SIGNING_KEY" --clearsign --digest-algo SHA256 \
+        -o "$DIST_DIR/InRelease" "$DIST_DIR/Release"
+    gpg --batch --yes --local-user "$SIGNING_KEY" --armor --detach-sign --digest-algo SHA256 \
+        -o "$DIST_DIR/Release.gpg" "$DIST_DIR/Release"
+fi
 
 printf '%s\n' "Built packages in $DIST_DIR"

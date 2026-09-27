@@ -39,7 +39,9 @@ dependencies such as `unzip`.
 
 Release builds use the repository key published in `mema.gpg`. Set
 `MEMA_SIGNING_KEY` to the matching secret-key fingerprint when rotating or
-building with a different GPG key.
+building with a different GPG key. The signed APT repository's version,
+architecture, and artifact-retention policy is documented in
+[`REPOSITORY.md`](REPOSITORY.md).
 
 ### 2. Install Toolchains
 Choose the specific languages or tools you need. You can lock specific versions or use the `-latest` meta-package for automated updates:
