@@ -117,6 +117,7 @@ type manageSnapshotMeta struct {
 	BackupFormat          string           `json:"backup_format,omitempty"`
 	BackupFile            string           `json:"backup_file,omitempty"`
 	Encryption            string           `json:"encryption,omitempty"`
+	MetadataEncryption    string           `json:"metadata_encryption,omitempty"`
 	EncryptionRecipient   string           `json:"encryption_recipient,omitempty"`
 	Compression           string           `json:"compression,omitempty"`
 	Ciphertext            string           `json:"ciphertext,omitempty"`

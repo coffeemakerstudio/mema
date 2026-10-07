@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	pathpkg "path"
@@ -236,6 +237,9 @@ func manageSnapshotV2(m manageManifest, manifestPath, service string, s scope, o
 			return manageFail(op, fmt.Errorf("verify published payload: %w", err), s)
 		}
 	}
+	if remote {
+		meta.MetadataEncryption = "gpg-public-key"
+	}
 	meta.State, meta.Complete = "verified", true
 	if err := writeSnapshotMetaV2(stagingDir, &meta); err != nil {
 		if remote {
@@ -250,7 +254,7 @@ func manageSnapshotV2(m manageManifest, manifestPath, service string, s scope, o
 		return manageFail(op, fmt.Errorf("local snapshot verification: %w", err), s)
 	}
 	if remote {
-		if err := publishRemoteMetadata(backend, meta, stagingDir, id); err != nil {
+		if err := publishRemoteMetadata(backend, meta, stagingDir, id, cfg.Backup.Encryption.Recipient); err != nil {
 			cleanupRemoteBackup(backend, meta)
 			return manageFail(op, fmt.Errorf("publish backup metadata: %w", err), s)
 		}
@@ -1498,25 +1502,20 @@ func backendDelete(backend manageBackendConfig, object string) error {
 	}
 }
 
-func publishRemoteMetadata(backend manageBackendConfig, meta manageSnapshotMeta, dir, id string) error {
+func publishRemoteMetadata(backend manageBackendConfig, meta manageSnapshotMeta, dir, id, recipient string) error {
 	if err := manageInjectFault("backup-metadata-publish"); err != nil {
 		return err
 	}
-	manifest := filepath.Join(dir, "manifest.json")
-	digestPath := filepath.Join(dir, "manifest.sha256")
-	remoteManifest := meta.Ciphertext + ".manifest.json"
-	remoteDigest := meta.Ciphertext + ".manifest.sha256"
-	for _, artifact := range []struct{ object, source string }{{remoteManifest, manifest}, {remoteDigest, digestPath}} {
-		data, err := os.ReadFile(artifact.source)
-		if err != nil {
-			return err
-		}
-		sha := sha256.Sum256(data)
-		if err := backendPublish(backend, artifact.object, artifact.source, hex.EncodeToString(sha[:]), id); err != nil {
-			return err
-		}
+	if recipient == "" || meta.MetadataEncryption != "gpg-public-key" {
+		return errors.New("remote snapshot metadata requires public-key encryption")
 	}
-	return nil
+	manifest := filepath.Join(dir, "manifest.json")
+	encryptedManifest := filepath.Join(dir, "manifest.gpg")
+	if err := encryptSnapshot(manifest, encryptedManifest, recipient); err != nil {
+		return fmt.Errorf("encrypt remote snapshot metadata: %w", err)
+	}
+	remoteManifest := meta.Ciphertext + ".manifest.gpg"
+	return backendPublish(backend, remoteManifest, encryptedManifest, manageHash(encryptedManifest), id)
 }
 
 func verifyRemoteBackup(backend manageBackendConfig, meta manageSnapshotMeta, dir string) error {
@@ -1526,6 +1525,21 @@ func verifyRemoteBackup(backend manageBackendConfig, meta manageSnapshotMeta, di
 	if err := backendVerify(backend, meta.Ciphertext, meta.PayloadSHA256); err != nil {
 		return err
 	}
+	if meta.MetadataEncryption == "gpg-public-key" {
+		localManifest := filepath.Join(dir, "manifest.gpg")
+		expected := manageHash(localManifest)
+		if expected == "" {
+			return errors.New("encrypted local snapshot metadata is missing")
+		}
+		if err := backendVerify(backend, meta.Ciphertext+".manifest.gpg", expected); err != nil {
+			return fmt.Errorf("remote encrypted metadata verification failed: %w", err)
+		}
+		return nil
+	}
+	if meta.MetadataEncryption != "" {
+		return fmt.Errorf("unsupported snapshot metadata encryption %q", meta.MetadataEncryption)
+	}
+	// Historical snapshots retain their legacy plaintext metadata objects.
 	for _, item := range []struct{ suffix, local string }{{".manifest.json", "manifest.json"}, {".manifest.sha256", "manifest.sha256"}} {
 		expected, err := snapshotManifestDigest(filepath.Join(dir, item.local))
 		if err != nil {
@@ -1543,6 +1557,7 @@ func cleanupRemoteBackup(backend manageBackendConfig, meta manageSnapshotMeta) {
 		return
 	}
 	_ = backendDelete(backend, meta.Ciphertext)
+	_ = backendDelete(backend, meta.Ciphertext+".manifest.gpg")
 	_ = backendDelete(backend, meta.Ciphertext+".manifest.json")
 	_ = backendDelete(backend, meta.Ciphertext+".manifest.sha256")
 }
@@ -1555,9 +1570,54 @@ func ftpDelete(backend manageBackendConfig, object string) error {
 	return ftpCommand(backend, []string{"DELE " + object})
 }
 
+func ftpCommandRoot(backendURL string, commands []string) (string, []string, error) {
+	if _, err := ftpNetrcMachine(backendURL); err != nil {
+		return "", nil, err
+	}
+	parsed, err := url.Parse(backendURL)
+	if err != nil {
+		return "", nil, errors.New("FTP backend requires a credential-free base URL")
+	}
+	prefix := strings.Trim(parsed.Path, "/")
+	if strings.Contains(prefix, "\\") {
+		return "", nil, errors.New("FTP backend base path is invalid")
+	}
+	for _, part := range strings.Split(prefix, "/") {
+		if part == "." || part == ".." {
+			return "", nil, errors.New("FTP backend base path is invalid")
+		}
+	}
+	rootURL := *parsed
+	rootURL.Path, rootURL.RawPath = "/", ""
+	rootURL.RawQuery, rootURL.Fragment = "", ""
+	rewritten := make([]string, 0, len(commands))
+	for _, command := range commands {
+		verb, object, ok := strings.Cut(command, " ")
+		if !ok || object == "" || (verb != "RNFR" && verb != "RNTO" && verb != "DELE") {
+			return "", nil, errors.New("unsupported FTP control command")
+		}
+		if strings.ContainsAny(object, "\r\n\x00") || validateBackendObject(object) != nil {
+			return "", nil, errors.New("unsafe FTP control object path")
+		}
+		if prefix != "" {
+			object = pathpkg.Join(prefix, object)
+		}
+		if err := validateBackendObject(object); err != nil {
+			return "", nil, err
+		}
+		rewritten = append(rewritten, verb+" "+object)
+	}
+	return rootURL.String(), rewritten, nil
+}
+
 func ftpCommand(backend manageBackendConfig, commands []string) error {
-	if backend.URL == "" || strings.Contains(backend.URL, "@") {
-		return errors.New("FTP backend requires a credential-free base URL")
+	host, err := ftpNetrcMachine(backend.URL)
+	if err != nil {
+		return err
+	}
+	controlURL, commands, err := ftpCommandRoot(backend.URL, commands)
+	if err != nil {
+		return err
 	}
 	netrc, err := os.CreateTemp("", "mema-ftp-netrc-")
 	if err != nil {
@@ -1578,8 +1638,6 @@ func ftpCommand(backend manageBackendConfig, commands []string) error {
 			}
 			password = strings.TrimSpace(string(b))
 		}
-		host := strings.TrimPrefix(strings.TrimPrefix(backend.URL, "ftp://"), "ftps://")
-		host = strings.Split(host, "/")[0]
 		if _, err := fmt.Fprintf(netrc, "machine %s login %s password %s\n", host, backend.Username, password); err != nil {
 			_ = netrc.Close()
 			return err
@@ -1588,14 +1646,14 @@ func ftpCommand(backend manageBackendConfig, commands []string) error {
 	if err := netrc.Close(); err != nil {
 		return err
 	}
-	args := []string{"--fail", "--silent", "--show-error", "--netrc-file", netrc.Name()}
+	args := []string{"-q", "--fail", "--silent", "--show-error", "--netrc-file", netrc.Name()}
 	if backend.TLS {
 		args = append(args, "--ftp-ssl")
 	}
 	for _, command := range commands {
 		args = append(args, "--quote", command)
 	}
-	args = append(args, strings.TrimRight(backend.URL, "/")+"/")
+	args = append(args, strings.TrimRight(controlURL, "/")+"/")
 	cmd := exec.Command("curl", args...)
 	cmd.Stdout, cmd.Stderr = io.Discard, io.Discard
 	if err := cmd.Run(); err != nil {

@@ -29,6 +29,7 @@ const (
 
 var errSelectionCanceled = errors.New("selection canceled")
 var manageJSON bool
+var memaVersion = "development"
 
 type scope struct {
 	name        string
@@ -88,11 +89,16 @@ func printHelp(w io.Writer) {
 	fmt.Fprintln(w, "  recover <inspect|verify|restore> <snapshot> Recover a self-describing snapshot")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Options:")
+	fmt.Fprintln(w, "  --version                    Show the package build version")
 	fmt.Fprintln(w, "  --local                      Use the per-user Mema paths")
 	fmt.Fprintln(w, "  --file <path>                Use a recipe file instead of an installed recipe")
 }
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--version" {
+		printVersion(os.Stdout)
+		return
+	}
 	if len(os.Args) < 2 || os.Args[1] == "help" || os.Args[1] == "--help" || os.Args[1] == "-h" {
 		printHelp(os.Stdout)
 		return
@@ -118,6 +124,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "mema: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func printVersion(w io.Writer) {
+	fmt.Fprintf(w, "mema %s\n", memaVersion)
 }
 
 func run(command string, args []string, local bool, recipeFile string) error {
@@ -176,6 +186,12 @@ func run(command string, args []string, local bool, recipeFile string) error {
 		return manageCommand(args, s)
 	case "recover":
 		return recoverCommand(args)
+	case "version":
+		if len(args) != 0 {
+			return errors.New("version does not accept arguments")
+		}
+		printVersion(os.Stdout)
+		return nil
 	default:
 		return fmt.Errorf("unknown command %q; run 'mema help'", command)
 	}

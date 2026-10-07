@@ -392,7 +392,7 @@ func TestManageBackupSameHostFreshHostAndEncryptedDRRoundTrip(t *testing.T) {
 			backup = entry
 		}
 	}
-	if backup.ID == "" || backup.EncryptionRecipient != "<configured>" || backup.PayloadSHA256 == "" || backup.BackendType != "local" {
+	if backup.ID == "" || backup.EncryptionRecipient != "<configured>" || backup.PayloadSHA256 == "" || backup.BackendType != "local" || backup.MetadataEncryption != "gpg-public-key" {
 		t.Fatalf("encrypted backup metadata is incomplete or leaks recipient: %#v", backup)
 	}
 	backupDir := filepath.Join(f.state, f.service, "snapshots", backup.ID)
@@ -427,6 +427,69 @@ func TestManageBackupSameHostFreshHostAndEncryptedDRRoundTrip(t *testing.T) {
 	if len(remoteBytes) == 0 || bytes.Contains(remoteBytes, []byte("persistent payload")) {
 		t.Fatal("remote encrypted object is empty or contains plaintext marker")
 	}
+	remoteMetadataObject := remoteObject + ".manifest.gpg"
+	remoteMetadataBytes, err := os.ReadFile(remoteMetadataObject)
+	if err != nil {
+		t.Fatalf("encrypted remote metadata missing: %v", err)
+	}
+	if len(remoteMetadataBytes) == 0 || bytes.Contains(remoteMetadataBytes, []byte(f.data)) || bytes.Contains(remoteMetadataBytes, []byte("manifest_version")) {
+		t.Fatal("remote metadata is empty or exposes plaintext snapshot metadata")
+	}
+	if err := validateFTPEncryptedArtifact(remoteObject); err != nil {
+		t.Fatalf("payload is not integrity-protected OpenPGP ciphertext: %v", err)
+	}
+	if err := validateFTPEncryptedArtifact(remoteMetadataObject); err != nil {
+		t.Fatalf("metadata is not integrity-protected OpenPGP ciphertext: %v", err)
+	}
+	for _, suffix := range []string{".manifest.json", ".manifest.sha256"} {
+		if _, err := os.Stat(remoteObject + suffix); !os.IsNotExist(err) {
+			t.Fatalf("legacy plaintext metadata artifact exists remotely: %s", suffix)
+		}
+	}
+
+	// Read back only the remote ciphertext artifacts, decrypt the manifest, and
+	// construct a fresh standalone recovery bundle from those bytes.
+	remoteRecovery := filepath.Join(f.root, "fresh-recovery", "snapshot")
+	if err := os.MkdirAll(remoteRecovery, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	readbackPayload := filepath.Join(f.root, "readback-payload.gpg")
+	readbackMetadata := filepath.Join(f.root, "readback-metadata.gpg")
+	if err := f.call(func() error {
+		backend, err := manageBackend(backup.Backend)
+		if err != nil {
+			return err
+		}
+		if err := backendGet(backend, backup.Ciphertext, readbackPayload); err != nil {
+			return err
+		}
+		return backendGet(backend, backup.Ciphertext+".manifest.gpg", readbackMetadata)
+	}); err != nil {
+		t.Fatalf("read back encrypted remote artifacts: %v", err)
+	}
+	decryptedManifest := filepath.Join(remoteRecovery, "manifest.json")
+	cmd := exec.Command("gpg", "--batch", "--yes", "--homedir", recoveryHome, "--output", decryptedManifest, "--decrypt", readbackMetadata)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("decrypt read-back metadata: %v: %s", err, output)
+	}
+	localManifestBytes, err := os.ReadFile(filepath.Join(backupDir, "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	decryptedManifestBytes, err := os.ReadFile(decryptedManifest)
+	if err != nil || !bytes.Equal(decryptedManifestBytes, localManifestBytes) {
+		t.Fatalf("read-back metadata differs from local manifest: %v", err)
+	}
+	readbackPayloadBytes, err := os.ReadFile(readbackPayload)
+	if err != nil || !bytes.Equal(readbackPayloadBytes, remoteBytes) {
+		t.Fatalf("read-back payload differs from remote object: %v", err)
+	}
+	if err := os.Rename(readbackPayload, filepath.Join(remoteRecovery, "payload.gpg")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(remoteRecovery, "manifest.sha256"), []byte(snapshotSHA256(decryptedManifestBytes)+"  manifest.json\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	corrupt := append([]byte(nil), remoteBytes...)
 	corrupt[len(corrupt)-1] ^= 0xff
 	if err := os.WriteFile(remoteObject, corrupt, 0o600); err != nil {
@@ -444,6 +507,17 @@ func TestManageBackupSameHostFreshHostAndEncryptedDRRoundTrip(t *testing.T) {
 		t.Fatalf("corrupt remote backup was still presented as valid: %s (%v)", invalidListing, err)
 	}
 	if err := os.WriteFile(remoteObject, remoteBytes, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	corruptMetadata := append([]byte(nil), remoteMetadataBytes...)
+	corruptMetadata[len(corruptMetadata)-1] ^= 0xff
+	if err := os.WriteFile(remoteMetadataObject, corruptMetadata, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := manageVerifySnapshot(f.service, backup.ID, localScope()); err == nil {
+		t.Fatal("modified remote encrypted metadata was accepted")
+	}
+	if err := os.WriteFile(remoteMetadataObject, remoteMetadataBytes, 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -498,13 +572,7 @@ func TestManageBackupSameHostFreshHostAndEncryptedDRRoundTrip(t *testing.T) {
 
 	// A recovery host gets the self-contained manifest and remote ciphertext,
 	// not the original application tree or the writer's private key.
-	freshBundle := filepath.Join(f.root, "fresh-recovery", "snapshot")
-	if err := copySnapshotDirectory(backupDir, freshBundle); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Remove(filepath.Join(freshBundle, "payload.gpg")); err != nil {
-		t.Fatal(err)
-	}
+	freshBundle := remoteRecovery
 	if err := os.RemoveAll(f.data); err != nil {
 		t.Fatal(err)
 	}

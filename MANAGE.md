@@ -169,8 +169,11 @@ checksum, resource metadata, exclusions, backend, and lifecycle state. V2
 publication is staged and a snapshot is not listed as verified unless its local
 artifact and configured remote copy verify. `backup` and `backups` provide
 explicit backup operations/listing; unknown formats and non-verified snapshots
-fail closed during restore. Managed restore selects the payload reader from
-snapshot metadata and accepts v1-to-v2 manifest changes limited to backup
+fail closed during restore. The snapshot `mema_version` field identifies the
+Manage engine version; it is informational and is distinct from the Debian
+package version and `snapshot_format`, which governs snapshot-reader
+compatibility. Managed restore selects the payload reader from snapshot
+metadata and accepts v1-to-v2 manifest changes limited to backup
 format/encryption policy and resource exclusion patterns. Captured resource
 roots, targets, health checks, and other service configuration must still
 match. Exclusions govern future capture; the artifact metadata defines the
@@ -191,10 +194,19 @@ A manifest can select an encryption recipient and backend:
 ```
 
 Encryption uses established GnuPG public-key encryption; Mema does not
-implement cryptographic primitives. The production host needs only the public
-recipient capability. Decryption uses a trusted local GnuPG home configured by
-`MEMA_MANAGE_GPG_HOME`; the recovery private key is not stored in manifests,
-snapshot metadata, logs, or the remote store.
+implement cryptographic primitives. For new remote v2 backups, Mema encrypts
+both the payload and remote manifest before upload. The manifest metadata
+records `metadata_encryption: "gpg-public-key"`; the remote manifest object is
+`<payload-object>.manifest.gpg`, and plaintext manifest sidecars are not
+published. Local Mema state retains its manifest and checksum sidecar. Older
+remote snapshots without this field retain the legacy plaintext metadata
+layout for verification compatibility.
+
+The production host needs only the public recipient capability. Decryption uses
+a trusted local GnuPG home configured by `MEMA_MANAGE_GPG_HOME`; the recovery
+private key is not stored in manifests, snapshot metadata, logs, or the remote
+store. OpenPGP integrity protection detects ciphertext modification but does
+not authenticate the writer; writer provenance/signing is not provided.
 
 Backend definitions are kept outside service manifests in
 `/etc/mema/backends.json` or the file named by `MEMA_MANAGE_BACKENDS_FILE`:
@@ -215,12 +227,22 @@ Backend definitions are kept outside service manifests in
 }
 ```
 
-The initial backends are `local` and FTP. FTP receives ciphertext only. Plain
-FTP transport is not confidential, and transport authentication is distinct
-from snapshot encryption. Passwords are read from a protected file and are not
-placed in command-line arguments or logs. Remote verification downloads the
-stored ciphertext and compares its SHA-256; an upload-success response alone
-never makes a snapshot recoverable.
+The initial backends are `local` and FTP. FTP uploads reject plaintext and
+OpenPGP ciphertext without MDC/AEAD integrity protection, so payload and
+metadata cross the upload boundary as encrypted, integrity-protected
+ciphertext. Plain FTP transport is not confidential; it is an accepted hosting
+provider constraint for this deployment, not a confidentiality guarantee.
+Transport authentication is distinct from snapshot encryption. Passwords are
+read from a protected file and are not placed in command-line arguments or
+logs. Remote verification downloads the stored ciphertext and compares its
+SHA-256; an upload-success response alone never makes a snapshot recoverable.
+FTP destination subpaths apply to transfers and to rename/delete control
+commands.
+
+For recovery from a remote backup, retrieve the payload and `.manifest.gpg`
+sidecar, decrypt the sidecar with the recovery GnuPG home, and recreate
+`manifest.sha256` from the decrypted `manifest.json`. The resulting standalone
+recovery directory can be inspected, verified, and restored with `mema recover`.
 
 The standalone recovery path is:
 

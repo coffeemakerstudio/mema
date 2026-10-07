@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func TestPrintVersionUsesBuildVersion(t *testing.T) {
+	original := memaVersion
+	memaVersion = "fixture-build-version"
+	t.Cleanup(func() { memaVersion = original })
+	var output strings.Builder
+	printVersion(&output)
+	if got, want := output.String(), "mema fixture-build-version\n"; got != want {
+		t.Fatalf("runtime version = %q, want %q", got, want)
+	}
+}
+
 func TestValidatePathComponent(t *testing.T) {
 	valid := []string{"go", "1.26.5", "tool+debug"}
 	for _, value := range valid {

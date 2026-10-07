@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT"
 
-VERSION="${VERSION:-0.4.1}"
+VERSION="${VERSION:-0.4.2}"
 SOURCE_REVISION="${MEMA_SOURCE_REVISION:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git show -s --format=%ct HEAD 2>/dev/null || date +%s)}"
 export SOURCE_DATE_EPOCH
@@ -47,7 +47,7 @@ mkdir -p "$DEB_DIR/DEBIAN" "$DEB_DIR/usr/local/bin" "$DEB_DIR/opt/mema/config.d"
 printf '%s\n' "--- Building mema $VERSION ---"
 (
     cd mema-go
-    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -trimpath -buildvcs=false -o "$MEMA_BINARY_OUTPUT" .
+    CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -trimpath -buildvcs=false -ldflags "-X main.memaVersion=$VERSION" -o "$MEMA_BINARY_OUTPUT" .
 )
 
 install -m 0755 "$MEMA_BINARY_OUTPUT" "$DEB_DIR/usr/local/bin/mema"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -257,9 +258,41 @@ func copyFile(source, destination string) error {
 	return closeErr
 }
 
+func validateFTPEncryptedArtifact(path string) error {
+	args := []string{"--batch"}
+	if home := os.Getenv("MEMA_MANAGE_GPG_HOME"); home != "" {
+		args = append(args, "--homedir", home)
+	}
+	args = append(args, "--list-packets", path)
+	output, _ := exec.Command("gpg", args...).CombinedOutput()
+	packets := string(output)
+	protectedData := strings.Contains(packets, ":encrypted data packet:") || strings.Contains(packets, ":aead encrypted packet:")
+	integrityProtected := strings.Contains(packets, "mdc_method:") || strings.Contains(packets, ":aead encrypted packet:")
+	// Public-key ciphertext can be inspected without the private key. Require
+	// authenticated-encryption packet structure and reject visible literal data.
+	if !strings.Contains(packets, ":pubkey enc packet:") || !protectedData || !integrityProtected || strings.Contains(packets, ":literal data packet:") {
+		return errors.New("FTP upload requires an integrity-protected OpenPGP-encrypted artifact")
+	}
+	return nil
+}
+
+func ftpNetrcMachine(backendURL string) (string, error) {
+	parsed, err := url.Parse(backendURL)
+	if err != nil || (parsed.Scheme != "ftp" && parsed.Scheme != "ftps") || parsed.Hostname() == "" || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", errors.New("FTP backend requires a credential-free base URL")
+	}
+	return parsed.Hostname(), nil
+}
+
 func ftpTransfer(backend manageBackendConfig, object, path string, download bool) error {
-	if backend.URL == "" || strings.Contains(backend.URL, "@") {
-		return errors.New("FTP backend requires a credential-free base URL")
+	if !download {
+		if err := validateFTPEncryptedArtifact(path); err != nil {
+			return err
+		}
+	}
+	host, err := ftpNetrcMachine(backend.URL)
+	if err != nil {
+		return err
 	}
 	password := ""
 	if backend.PasswordFile != "" {
@@ -279,15 +312,13 @@ func ftpTransfer(backend manageBackendConfig, object, path string, download bool
 		return err
 	}
 	if backend.Username != "" {
-		host := strings.TrimPrefix(strings.TrimPrefix(backend.URL, "ftp://"), "ftps://")
-		host = strings.Split(host, "/")[0]
 		if _, err := fmt.Fprintf(netrc, "machine %s login %s password %s\n", host, backend.Username, password); err != nil {
 			return err
 		}
 	}
 	_ = netrc.Close()
 	url := strings.TrimRight(backend.URL, "/") + "/" + strings.TrimLeft(object, "/")
-	args := []string{"--fail", "--silent", "--show-error", "--netrc-file", netrcPath}
+	args := []string{"-q", "--fail", "--silent", "--show-error", "--netrc-file", netrcPath}
 	if backend.TLS {
 		args = append(args, "--ftp-ssl")
 	}
