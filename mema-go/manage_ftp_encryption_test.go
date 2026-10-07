@@ -178,25 +178,18 @@ func TestFTPEncryptedArtifactRequiresPublicKeyAndIntegrityProtection(t *testing.
 	if err := validateFTPEncryptedArtifact(cipher); err != nil {
 		t.Fatalf("GPG encrypted, integrity-protected artifact rejected: %v", err)
 	}
-	weakRecoveryHome := filepath.Join(dir, "weak-recovery-home")
-	if err := os.Mkdir(weakRecoveryHome, 0o700); err != nil {
-		t.Fatal(err)
-	}
-	weakRecipient := "fixture-weak@example.invalid"
-	cmd := exec.Command("gpg", "--batch", "--homedir", weakRecoveryHome, "--passphrase", "", "--quick-generate-key", weakRecipient, "rsa2048", "encr", "1d")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("generate RSA fixture recipient: %v: %s", err, output)
-	}
-	cmd = exec.Command("gpg", "--batch", "--homedir", weakRecoveryHome, "--armor", "--export", weakRecipient)
-	publicKey, err := cmd.Output()
+	// This public-only key was generated with GnuPG 2.2, without an AEAD
+	// preference, so GnuPG 2.4 can produce a real RFC-2440 no-MDC test packet.
+	publicKey, err := os.ReadFile(filepath.Join("testdata", "legacy-rsa-test-recipient.asc"))
 	if err != nil {
-		t.Fatalf("export RSA fixture public key: %v", err)
+		t.Fatalf("read public-only legacy recipient fixture: %v", err)
 	}
-	cmd = exec.Command("gpg", "--batch", "--homedir", writerHome, "--import")
+	cmd := exec.Command("gpg", "--batch", "--homedir", writerHome, "--import")
 	cmd.Stdin = strings.NewReader(string(publicKey))
 	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("import RSA fixture public key: %v: %s", err, output)
+		t.Fatalf("import public-only legacy recipient fixture: %v: %s", err, output)
 	}
+	weakRecipient := "fixture-legacy@example.invalid"
 	weakCipher := filepath.Join(dir, "metadata-unauthenticated.gpg")
 	cmd = exec.Command("gpg", "--batch", "--yes", "--homedir", writerHome, "--trust-model", "always", "--rfc2440", "--disable-mdc", "--output", weakCipher, "--encrypt", "--recipient", weakRecipient, plain)
 	if output, err := cmd.CombinedOutput(); err != nil {
