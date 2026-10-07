@@ -258,6 +258,17 @@ func copyFile(source, destination string) error {
 	return closeErr
 }
 
+func openPGPMDCIntegrityProtected(packets string) bool {
+	for _, line := range strings.Split(packets, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 2 && fields[0] == "mdc_method:" {
+			// OpenPGP MDC uses SHA-1 (hash algorithm ID 2); ID 0 disables MDC.
+			return fields[1] == "2"
+		}
+	}
+	return false
+}
+
 func validateFTPEncryptedArtifact(path string) error {
 	args := []string{"--batch"}
 	if home := os.Getenv("MEMA_MANAGE_GPG_HOME"); home != "" {
@@ -267,7 +278,7 @@ func validateFTPEncryptedArtifact(path string) error {
 	output, _ := exec.Command("gpg", args...).CombinedOutput()
 	packets := string(output)
 	protectedData := strings.Contains(packets, ":encrypted data packet:") || strings.Contains(packets, ":aead encrypted packet:")
-	integrityProtected := strings.Contains(packets, "mdc_method:") || strings.Contains(packets, ":aead encrypted packet:")
+	integrityProtected := openPGPMDCIntegrityProtected(packets) || strings.Contains(packets, ":aead encrypted packet:")
 	// Public-key ciphertext can be inspected without the private key. Require
 	// authenticated-encryption packet structure and reject visible literal data.
 	if !strings.Contains(packets, ":pubkey enc packet:") || !protectedData || !integrityProtected || strings.Contains(packets, ":literal data packet:") {

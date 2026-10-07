@@ -178,13 +178,56 @@ func TestFTPEncryptedArtifactRequiresPublicKeyAndIntegrityProtection(t *testing.
 	if err := validateFTPEncryptedArtifact(cipher); err != nil {
 		t.Fatalf("GPG encrypted, integrity-protected artifact rejected: %v", err)
 	}
+	weakRecoveryHome := filepath.Join(dir, "weak-recovery-home")
+	if err := os.Mkdir(weakRecoveryHome, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	weakRecipient := "fixture-weak@example.invalid"
+	cmd := exec.Command("gpg", "--batch", "--homedir", weakRecoveryHome, "--passphrase", "", "--quick-generate-key", weakRecipient, "rsa2048", "encr", "1d")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("generate RSA fixture recipient: %v: %s", err, output)
+	}
+	cmd = exec.Command("gpg", "--batch", "--homedir", weakRecoveryHome, "--armor", "--export", weakRecipient)
+	publicKey, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("export RSA fixture public key: %v", err)
+	}
+	cmd = exec.Command("gpg", "--batch", "--homedir", writerHome, "--import")
+	cmd.Stdin = strings.NewReader(string(publicKey))
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("import RSA fixture public key: %v: %s", err, output)
+	}
 	weakCipher := filepath.Join(dir, "metadata-unauthenticated.gpg")
-	cmd := exec.Command("gpg", "--batch", "--yes", "--homedir", writerHome, "--trust-model", "always", "--rfc2440", "--disable-mdc", "--output", weakCipher, "--encrypt", "--recipient", recipient, plain)
+	cmd = exec.Command("gpg", "--batch", "--yes", "--homedir", writerHome, "--trust-model", "always", "--rfc2440", "--disable-mdc", "--output", weakCipher, "--encrypt", "--recipient", weakRecipient, plain)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("create legacy unauthenticated fixture: %v: %s", err, output)
 	}
+	packets, _ := exec.Command("gpg", "--batch", "--homedir", writerHome, "--list-packets", weakCipher).CombinedOutput()
+	packetListing := string(packets)
+	if !strings.Contains(packetListing, ":pubkey enc packet:") || !strings.Contains(packetListing, ":encrypted data packet:") {
+		t.Fatalf("negative fixture is not public-key encrypted OpenPGP data: %s", packets)
+	}
+	if strings.Contains(packetListing, ":aead encrypted packet:") || openPGPMDCIntegrityProtected(packetListing) {
+		t.Fatalf("negative fixture unexpectedly has integrity protection: %s", packets)
+	}
 	if err := validateFTPEncryptedArtifact(weakCipher); err == nil {
 		t.Fatal("unauthenticated OpenPGP ciphertext passed the FTP upload predicate")
+	}
+}
+
+func TestOpenPGPMDCIntegrityProtectedRequiresARealMethod(t *testing.T) {
+	for _, test := range []struct {
+		packets string
+		want    bool
+	}{
+		{packets: "mdc_method: 2", want: true},
+		{packets: "mdc_method: 0", want: false},
+		{packets: "mdc_method: 20", want: false},
+		{packets: ":encrypted data packet:", want: false},
+	} {
+		if got := openPGPMDCIntegrityProtected(test.packets); got != test.want {
+			t.Errorf("openPGPMDCIntegrityProtected(%q) = %t, want %t", test.packets, got, test.want)
+		}
 	}
 }
 
