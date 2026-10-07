@@ -9,9 +9,9 @@ Mema is a Linux-only, Debian-distributed meta-manager for isolated binary toolch
 - Keep installation logic in small shell recipes and distribution in Debian packages.
 - Support side-by-side versions, version selection, verified downloads, a cache, and `fzf`-driven switching/selection.
 - Require only lightweight host dependencies, not a host Python, Node, Rust, or Go runtime.
-- Publish signed APT packages and use CI to build, test, sign, and deploy the repository.
+- Publish signed APT packages through an authorized, qualified release process. The legacy GitHub Actions release runner is retired; a replacement TPA test/publish runner is planned but not yet implemented.
 
-Treat this contract as the target behavior. Do not remove or weaken an advertised feature merely because it is incomplete in the current code.
+Treat this contract as the target behavior. Do not claim the replacement runner exists or that local build output has been published. Retired release automation may be removed when its replacement is pending, while preserving package and repository integrity requirements.
 
 ## Repository Map
 
@@ -26,8 +26,8 @@ Treat this contract as the target behavior. Do not remove or weaken an advertise
 | `build-repo.sh` | Builds the core and recipe Debian packages, then writes the APT index into `dist/`. |
 | `scripts/package.sh` | Compatibility entry point that delegates to `build-repo.sh`. |
 | `install_repo.sh` | Installs the public APT signing key and source, then installs `mema`. |
-| `tests/` | Docker-based APT installation smoke test. |
-| `.github/workflows/build_repo.yml` | Build, GPG signing, integration test, and GitHub Pages deployment workflow. |
+| `tests/` | Docker-based APT installation smoke tests. |
+| Release automation | No active test/publish runner; replacement TPA runner is pending. |
 
 `dist/` and `build/` are generated and ignored. Do not commit their contents.
 
@@ -96,7 +96,7 @@ The current build scripts require Debian packaging tools, Docker for the integra
 MEMA_SIGN=1 ./build-repo.sh
 ```
 
-`build-repo.sh` builds the Go binary, synchronizes the Debian staging tree, builds recipe packages, and generates `Packages`, `Packages.gz`, and `Release`. Set `MEMA_SIGN=1` only when a release GPG key is available; this additionally produces `InRelease` and `Release.gpg`. CI imports the signing key, uses that mode, and then runs the Docker test.
+`build-repo.sh` builds the Go binary, synchronizes the Debian staging tree, builds recipe packages, and generates `Packages`, `Packages.gz`, and `Release`. Set `MEMA_SIGN=1` only when an authorized release GPG key is available; this additionally produces local `InRelease` and `Release.gpg` files. The former GitHub Actions test/publish runner has been retired. No replacement TPA runner is active, so local build or signing output is not automatically qualified or published.
 
 Package staging and builds use `dpkg-deb` directly. Repository indexes are
 generated with `dpkg-scanpackages` and `apt-ftparchive`; signed builds additionally

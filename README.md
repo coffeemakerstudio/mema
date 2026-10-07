@@ -172,7 +172,7 @@ Go and Bun binaries.
 *   **Zero Runtime Bloat:** No dependency on Python, Node, or Go on the host system. Requires only lightweight shell, download, archive, JSON, and selection tools.
 *   **Deterministic Environments:** Predictable paths in `/opt/mema` ensure reproducible development setups.
 *   **Side-by-Side Versions:** Run multiple versions of the same software simultaneously without conflicts.
-*   **CI/CD Driven:** Automated pipeline that builds, signs, and deploys Debian packages via GitHub Actions and GitHub Pages.
+*   **Signed APT Distribution:** Packages use GPG-signed APT metadata. The legacy GitHub Actions test/publish runner has been retired; a replacement TPA test/publish runner is planned but not yet available.
 
 ---
 

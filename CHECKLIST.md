@@ -53,14 +53,14 @@ state. The project contract and contributor rules are defined in `AGENTS.md`.
 
 ## P0: Signed APT Distribution
 
-- [ ] Configure the `MEMA_SIGNING_KEY` repository secret in CI.
+- [ ] Build and qualify the replacement TPA test/publish runner; it is not yet implemented.
 - [x] Build signed metadata with `MEMA_SIGN=1 ./build-repo.sh`.
 - [x] Verify `InRelease` and `Release.gpg` are generated.
 - [x] Verify `install_repo.sh` installs the correct public key.
 - [x] Ensure APT uses a scoped repository keyring rather than global trust.
 - [ ] Test installation from the published repository in a clean Debian
   container.
-- [ ] Confirm GitHub Pages publishes packages and repository metadata.
+- [ ] Publish and verify packages and repository metadata through the authorized replacement release runner.
 
 ## P1: User Experience
 
